@@ -11,7 +11,7 @@ blob = fd._blob()
 
 // Do this...
 // important to set correct mimetype
-xhr.setRequestHeader('Content-Type', blob.type) // 'multipart/form-data; boundary=xxx
+xhr.setRequestHeader('Content-Type', blob.type) // multipart/form-data; boundary=xxx
 xhr.send(blob)
 
 xhr.send(fd) // This don't work... Needs to be a native FormData
