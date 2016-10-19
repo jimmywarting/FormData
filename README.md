@@ -10,7 +10,8 @@ fd = new FormData(form)
 blob = fd._blob()
 
 // Do this...
-xhr.setRequestHeader('Content-Type', blob.type) // 'multipart/form-data; boundary=xxx (important to set correct mimetype)
+// important to set correct mimetype
+xhr.setRequestHeader('Content-Type', blob.type) // 'multipart/form-data; boundary=xxx
 xhr.send(blob)
 
 xhr.send(fd) // This don't work... Needs to be a native FormData
