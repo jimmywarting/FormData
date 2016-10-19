@@ -1,5 +1,6 @@
 const map = new WeakMap
 const wm = o => map.get(o)
+const NativeFormData = self.FormData
 
 class FormData {
 
@@ -10,24 +11,24 @@ class FormData {
    */
   constructor(form) {
     map.set(this, Object.create(null))
-    
+
     if (!form) return
-    
+
     for (let {name, type, value, files, checked, selectedOptions} of form.elements) {
       if(!name) continue
-      
+
       if (type === 'file')
         for (let file of files)
           this.append(name, file)
       else if (type === 'select-multiple' || type === 'select-one')
-        for (let elm of selectedOptions) 
+        for (let elm of selectedOptions)
           this.append(name, elm.value)
       else if (type === 'checkbox' && checked)
         this.append(name, value)
       else
       this.append(name, value)
     }
-    
+
   }
 
 
@@ -171,10 +172,10 @@ class FormData {
       yield value
   }
 
-  
+
   /**
    * Non standard but it has been proposed: https://github.com/w3c/FileAPI/issues/40
-   * 
+   *
    * @return Object ReadableStream
    */
   stream() {
@@ -184,7 +185,22 @@ class FormData {
       throw new Error('Include https://github.com/jimmywarting/Screw-FileReader for streaming support')
     }
   }
-  
+
+  /**
+   * Return a native (perhaps degraded) FormData with only a `append` method
+   * Can throw if it's not supported
+   * 
+   * @return {[type]} [description]
+   */
+  _asNative() {
+    let fd = new NativeFormData
+
+    for (let [name, value] of this)
+      fd.append(name, value)
+
+    return fd
+  }
+
 
   /**
    * [_blob description]
@@ -210,9 +226,9 @@ class FormData {
         )
       }
     }
-	
+
     chunks.push(`--${boundary}--`)
-	
+
     return new Blob(chunks, {type: 'multipart/form-data; boundary=' + boundary})
   }
 
