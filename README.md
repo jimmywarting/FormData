@@ -17,6 +17,13 @@ xhr.send(blob)
 xhr.send(fd) // This don't work... Needs to be a native FormData
 ```
 
+Another possible solution is to convert the form to a native FormData
+But then you would lose all the other method the FormData may not support
+```javascript
+fd = new FormData(form)
+fd._asNative() // returns a native formData with all the fields
+```
+
 The current status of the native FormData is this
 ![skarmavbild 2016-10-19 kl 21 32 19](https://cloud.githubusercontent.com/assets/1148376/19534352/b7f42d8c-9643-11e6-91da-7f89580f51d8.png)
 
