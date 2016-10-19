@@ -9,7 +9,10 @@ This dose however provide you with way to convert the entiere form to a blob and
 fd = new FormData(form)
 blob = fd._blob()
 
-xhr.send(blob) // Do this...
+// Do this...
+xhr.setRequestHeader('Content-Type', blob.type) // 'multipart/form-data; boundary=xxx (important to set correct mimetype)
+xhr.send(blob)
+
 xhr.send(fd) // This don't work... Needs to be a native FormData
 ```
 
