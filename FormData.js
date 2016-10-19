@@ -219,7 +219,7 @@ class FormData {
 
   /**
    * The class itself is iterable
-   * alies for headers.entries()
+   * alies for formdata.entries()
    *
    * @return  Iterator
    */
@@ -232,7 +232,7 @@ class FormData {
    * Create the default string description.
    * It is accessed internally by the Object.prototype.toString().
    *
-   * @return  String  [Object Headers]
+   * @return  String  [Object FormData]
    */
   get [Symbol.toStringTag]() {
     return 'FormData'
