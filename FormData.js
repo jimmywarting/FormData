@@ -12,7 +12,8 @@ class FormData {
   constructor(form) {
     map.set(this, Object.create(null))
 
-    if (!form) return
+    if (!form) 
+      return this
 
     for (let {name, type, value, files, checked, selectedOptions} of form.elements) {
       if(!name) continue
@@ -26,7 +27,7 @@ class FormData {
       else if (type === 'checkbox' && checked)
         this.append(name, value)
       else
-      this.append(name, value)
+        this.append(name, value)
     }
 
   }
