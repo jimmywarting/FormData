@@ -7,7 +7,7 @@ class FormData {
   /**
    * FormData class
    *
-   * @param   Object  Formdata
+   * @param   HTMLFormElement   form
    */
   constructor(form) {
     map.set(this, Object.create(null))
@@ -211,7 +211,7 @@ class FormData {
     var chunks = []
 
     for (let [name, value] of this) {
-      chunks.push('--' + boundary + '\r\n')
+      chunks.push(`--${boundary}\r\n`)
 
       if (value instanceof File) {
         chunks.push(
@@ -235,7 +235,7 @@ class FormData {
 
   /**
    * The class itself is iterable
-   * alies for formdata.entries()
+   * alias for formdata.entries()
    *
    * @return  Iterator
    */
