@@ -70,19 +70,18 @@ class FormData {
    */
   *entries() {
     let map = wm(this)
+    let opts = {}
 
     for (let name in map)
-      for (let [value, filename, opts = {}] of map[name]) {
+      for (let [value, filename] of map[name]) {
         if (value instanceof File) {
           filename = filename || value.name
-          opts = {
-            type: value.type,
-            lastModified: value.lastModified
-          }
+          opts.type = value.type
+          opts.lastModified = value.lastModified
         }
 
         if (value instanceof Blob) {
-          value = new File([value], filename || filename === undefined ? 'blob' : filename + '', opts)
+          value = new File([value], filename === undefined ? 'blob' : filename + '', opts)
         }
 
         yield [name, value]
