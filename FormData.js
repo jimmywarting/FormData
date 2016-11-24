@@ -158,7 +158,7 @@ class FormData {
    * @return  Void
    */
   set(name, value, filename) {
-    wm(this)[name + ''] = [value, filename]
+    wm(this)[name + ''] = [[value, filename]]
   }
 
 
