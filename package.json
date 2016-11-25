@@ -1,0 +1,25 @@
+{
+  "name": "formdata-polyfill",
+  "version": "1.0.0",
+  "description": "HTML5 `FormData` polyfill for Browsers.",
+  "main": "FormData.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jimmywarting@github.com/jimmywarting/FormData.git"
+  },
+  "keywords": [
+    "formdata",
+    "html5",
+    "browser"
+    "polyfill"
+  ],
+  "author": "Jimmy Wärting",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jimmywarting/FormData/issues"
+  },
+  "homepage": "https://github.com/jimmywarting/FormData#readme"
+}

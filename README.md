@@ -1,6 +1,13 @@
 # FormData
 A FormData polyfill
 
+
+[![npm version][npm-image]][npm-url]
+
+```bash
+npm install formdata-polyfill
+```
+
 Meant to be used with babel, closer-compiler or equivalent (since it's written in es6 using class, WeakMap, Iterators, `for...of`)
 
 This doesn't monkey patch xhr#send like [Rob--W](https://github.com/Rob--W) did [here](https://gist.github.com/Rob--W/8b5adedd84c0d36aba64).
@@ -28,10 +35,13 @@ The current status of the native FormData is this
 
 
 This lib provides you all the function others don't include
- - `append` with filename	
+ - `append` with filename
  - `delete()`, `get()`, `getAll()`, `has()`, `set()`
  - `entries()`, `keys()`, `values()`, and support of `for...of`
  - Available in web workers	(yes, just include it...)
 
 
 > The reason why Rob--W's version didn't work for me was that it only works in web workers due to FileReaderSync beeing used. I did it with constructing new chunks with the blob constructor instead. `new Blob([string, blob, file, etc])`
+
+  [npm-image]: https://img.shields.io/npm/v/formdata-polyfill
+  [npm-url]: https://www.npmjs.com/package/formdata-polyfill
