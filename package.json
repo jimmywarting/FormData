@@ -1,6 +1,6 @@
 {
   "name": "formdata-polyfill",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "HTML5 `FormData` polyfill for Browsers.",
   "main": "FormData.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "keywords": [
     "formdata",
     "html5",
-    "browser"
+    "browser",
     "polyfill"
   ],
   "author": "Jimmy Wärting",
