@@ -43,5 +43,5 @@ This lib provides you all the function others don't include
 
 > The reason why Rob--W's version didn't work for me was that it only works in web workers due to FileReaderSync beeing used. I did it with constructing new chunks with the blob constructor instead. `new Blob([string, blob, file, etc])`
 
-  [npm-image]: https://img.shields.io/npm/v/formdata-polyfill
+  [npm-image]: https://img.shields.io/npm/v/formdata-polyfill.svg?style=flat-square
   [npm-url]: https://www.npmjs.com/package/formdata-polyfill
