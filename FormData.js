@@ -1,18 +1,20 @@
 const map = new WeakMap
 const wm = o => map.get(o)
-const NativeFormData = self.FormData
 
-class FormData {
+/**
+ * @implements {Iterable}
+ */
+class FormDataPolyfill {
 
   /**
    * FormData class
    *
-   * @param   HTMLFormElement   form
+   * @param {HTMLElement=} form
    */
   constructor(form) {
     map.set(this, Object.create(null))
 
-    if (!form) 
+    if (!form)
       return this
 
     for (let {name, type, value, files, checked, selectedOptions} of form.elements) {
@@ -29,17 +31,16 @@ class FormData {
       else
         this.append(name, value)
     }
-
   }
 
 
   /**
    * Append a field
    *
-   * @param   String  name      field name
-   * @param   Mixed   value     string / blob / file
-   * @param   String  filename  filename to use with blob
-   * @return  Void
+   * @param   {String}           name      field name
+   * @param   {String|Blob|File} value     string / blob / file
+   * @param   {String=}          filename  filename to use with blob
+   * @return  {Undefined}
    */
   append(name, value, filename) {
     let map = wm(this)
@@ -55,8 +56,8 @@ class FormData {
   /**
    * Delete all fields values given name
    *
-   * @param   String  name  Field name
-   * @return  Void
+   * @param   {String}  name  Field name
+   * @return  {Undefined}
    */
   delete(name) {
     delete wm(this)[name += '']
@@ -66,7 +67,7 @@ class FormData {
   /**
    * Iterate over all fields as [name, value]
    *
-   * @return  Iterator
+   * @return {Iterator}
    */
   *entries() {
     let map = wm(this)
@@ -92,9 +93,9 @@ class FormData {
   /**
    * Iterate over all fields
    *
-   * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
-   * @param   Boolean   thisArg   `this` context for callback function
-   * @return  Void
+   * @param   {Function}  callback  Executed for each item with parameters (value, name, thisArg)
+   * @param   {Object=}   thisArg   `this` context for callback function
+   * @return  {Undefined}
    */
   forEach(callback, thisArg) {
     for (let [name, value] of this)
@@ -105,8 +106,8 @@ class FormData {
   /**
    * Return first field value given name
    *
-   * @param   String  name  Field name
-   * @return  Mixed   value Fields value
+   * @param   {String}  name  Field name
+   * @return  {String|File}     value Fields value
    */
   get(name) {
     let map = wm(this)
@@ -119,8 +120,8 @@ class FormData {
   /**
    * Return all fields values given name
    *
-   * @param   String  name           Fields name
-   * @return  Array   [name, value]
+   * @param   {String}  name           Fields name
+   * @return  {Array}   [name, value]
    */
   getAll(name) {
     return (wm(this)[name += ''] || []).concat()
@@ -130,8 +131,8 @@ class FormData {
   /**
    * Check for field name existence
    *
-   * @param   String   name  Field name
-   * @return  Boolean
+   * @param   {String}   name  Field name
+   * @return  {boolean}
    */
   has(name) {
     return (name+'') in wm(this)
@@ -141,7 +142,7 @@ class FormData {
   /**
    * Iterate over all fields name
    *
-   * @return  Iterator
+   * @return {Iterator}
    */
   *keys() {
     for (let [name] of this)
@@ -152,10 +153,10 @@ class FormData {
   /**
    * Overwrite all values given name
    *
-   * @param   String  name      Filed name
-   * @param   String  value     Field value
-   * @param   String  filename  Filename (optional)
-   * @return  Void
+   * @param   {String}    name      Filed name
+   * @param   {String}    value     Field value
+   * @param   {String=}   filename  Filename (optional)
+   * @return  {Undefined}
    */
   set(name, value, filename) {
     wm(this)[name + ''] = [[value, filename]]
@@ -165,7 +166,7 @@ class FormData {
   /**
    * Iterate over all fields
    *
-   * @return  Iterator
+   * @return {Iterator}
    */
   *values() {
     for (let [name, value] of this)
@@ -176,7 +177,7 @@ class FormData {
   /**
    * Non standard but it has been proposed: https://github.com/w3c/FileAPI/issues/40
    *
-   * @return Object ReadableStream
+   * @return {ReadableStream}
    */
   stream() {
     try {
@@ -189,11 +190,11 @@ class FormData {
   /**
    * Return a native (perhaps degraded) FormData with only a `append` method
    * Can throw if it's not supported
-   * 
-   * @return {[type]} [description]
+   *
+   * @return {FormData}
    */
   _asNative() {
-    let fd = new NativeFormData
+    let fd = new FormData
 
     for (let [name, value] of this)
       fd.append(name, value)
@@ -204,7 +205,8 @@ class FormData {
 
   /**
    * [_blob description]
-   * @return {[type]} [description]
+   *
+   * @return {Blob} [description]
    */
   _blob() {
     var boundary = "----FormDataPolyfill" + Math.random();
@@ -237,7 +239,7 @@ class FormData {
    * The class itself is iterable
    * alias for formdata.entries()
    *
-   * @return  Iterator
+   * @return  {Iterator}
    */
   [Symbol.iterator]() {
     return this.entries()
@@ -248,11 +250,11 @@ class FormData {
    * Create the default string description.
    * It is accessed internally by the Object.prototype.toString().
    *
-   * @return  String  [Object FormData]
+   * @return {String} FormData
    */
   get [Symbol.toStringTag]() {
     return 'FormData'
   }
 }
 
-module.exports = FormData
+module.exports = FormDataPolyfill
