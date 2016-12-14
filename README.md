@@ -14,12 +14,7 @@ This doesn't monkey patch xhr#send like [Rob--W](https://github.com/Rob--W) did 
 However this provides you a way to convert the entire form to a blob and send it with xhr or fetch.
 ```javascript
 fd = new FormData(form)
-blob = fd._blob()
-
-// Do this...
-// important to set correct mimetype
-xhr.setRequestHeader('Content-Type', blob.type) // multipart/form-data; boundary=xxx
-xhr.send(blob)
+xhr.send(fd._blob())
 
 xhr.send(fd) // This don't work... Needs to be a native FormData
 ```
