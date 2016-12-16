@@ -127,7 +127,7 @@ class FormDataPolyfill {
    * @return  {Array}   [name, value]
    */
   getAll(name) {
-    return (wm(this)[name += ''] || []).concat()
+    return (wm(this)[name += ''] || []).concat().map(v => v[0])
   }
 
 
