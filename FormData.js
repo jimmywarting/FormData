@@ -49,6 +49,9 @@ class FormDataPolyfill {
     if (!map[name])
       map[name] = []
 
+    if (!(value instanceof File) && !(value instanceof Blob) && typeof value != 'string') {
+      value += ''
+    }
     map[name].push([value, filename])
   }
 
@@ -159,6 +162,9 @@ class FormDataPolyfill {
    * @return  {Undefined}
    */
   set(name, value, filename) {
+    if (!(value instanceof File) && !(value instanceof Blob) && typeof value != 'string') {
+      value += ''
+    }
     wm(this)[name + ''] = [[value, filename]]
   }
 
