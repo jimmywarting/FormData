@@ -113,7 +113,7 @@ class FormDataPolyfill {
     let map = wm(this)
     name += ''
 
-    return map[name] ? map[name][0] : null
+    return map[name] ? map[name][0][0] : null
   }
 
 
