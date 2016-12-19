@@ -1,6 +1,39 @@
 const map = new WeakMap
 const wm = o => map.get(o)
 
+function normilizeValue(value) {
+  filename = value[1]
+  value = value[0]
+  
+  if (value instanceof Blob)
+    value = new File([value], filename, {
+      type: value.type,
+      lastModified: value.lastModified
+    })
+
+  return value
+}
+
+function stringify(name) {
+  if (!arguments.length) 
+    throw new TypeError('1 argument required, but only 0 present.')
+
+  return [name + '']
+}
+
+function normilizeArgs(name, value, filename) {
+  if (arguments.length < 2) 
+    throw new TypeError(`2 arguments required, but only ${arguments.length} present.`)
+    
+  return value instanceof Blob 
+    ? [name + '', value, filename !== undefined 
+      ? filename + '' 
+      : value[Symbol.toStringTag] === 'File'
+        ? value.name 
+        : 'Blob']
+    : [name + '', value + '']
+}
+
 /**
  * @implements {Iterable}
  */
@@ -44,7 +77,6 @@ class FormDataPolyfill {
    */
   append(name, value, filename) {
     let map = wm(this)
-    name += ''
 
     if (!map[name])
       map[name] = []
@@ -60,7 +92,7 @@ class FormDataPolyfill {
    * @return  {Undefined}
    */
   delete(name) {
-    delete wm(this)[name += '']
+    delete wm(this)[name]
   }
 
 
@@ -71,24 +103,11 @@ class FormDataPolyfill {
    */
   *entries() {
     let map = wm(this)
-    let opts = {}
 
     for (let name in map)
-      for (let [value, filename] of map[name]) {
-        if (value instanceof File) {
-          filename = filename || value.name
-          opts.type = value.type
-          opts.lastModified = value.lastModified
-        }
-
-        if (value instanceof Blob) {
-          value = new File([value], filename === undefined ? 'blob' : filename + '', opts)
-        }
-
-        yield [name, value]
-      }
+      for (let value of map[name])
+        yield [name, normilizeValue(value)]
   }
-
 
   /**
    * Iterate over all fields
@@ -107,24 +126,22 @@ class FormDataPolyfill {
    * Return first field value given name
    *
    * @param   {String}  name  Field name
-   * @return  {String|File}     value Fields value
+   * @return  {String|File}   value Fields value
    */
   get(name) {
     let map = wm(this)
-    name += ''
-
-    return map[name] ? map[name][0] : null
+    return map[name] ? normilizeValue(map[name][0]) : null
   }
 
 
   /**
    * Return all fields values given name
    *
-   * @param   {String}  name           Fields name
-   * @return  {Array}   [name, value]
+   * @param   {String}  name  Fields name
+   * @return  {Array}         [value, value]
    */
   getAll(name) {
-    return (wm(this)[name += ''] || []).concat()
+    return (wm(this)[name] || []).map(normilizeValue)
   }
 
 
@@ -135,9 +152,9 @@ class FormDataPolyfill {
    * @return  {boolean}
    */
   has(name) {
-    return (name+'') in wm(this)
+    return name in wm(this)
   }
-
+  
 
   /**
    * Iterate over all fields name
@@ -159,7 +176,7 @@ class FormDataPolyfill {
    * @return  {Undefined}
    */
   set(name, value, filename) {
-    wm(this)[name + ''] = [[value, filename]]
+    wm(this)[name] = [[value, filename]]
   }
 
 
@@ -187,6 +204,7 @@ class FormDataPolyfill {
     }
   }
 
+
   /**
    * Return a native (perhaps degraded) FormData with only a `append` method
    * Can throw if it's not supported
@@ -209,13 +227,13 @@ class FormDataPolyfill {
    * @return {Blob} [description]
    */
   _blob() {
-    var boundary = "----FormDataPolyfill" + Math.random();
+    var boundary = '----FormDataPolyfill' + Math.random()
     var chunks = []
 
     for (let [name, value] of this) {
       chunks.push(`--${boundary}\r\n`)
 
-      if (value instanceof File) {
+      if (value[Symbol.toStringTag] === 'File') {
         chunks.push(
           `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n`,
           `Content-Type: ${value.type}\r\n\r\n`,
@@ -254,6 +272,20 @@ class FormDataPolyfill {
    */
   get [Symbol.toStringTag]() {
     return 'FormData'
+  }
+}
+
+for (let [method, overide] of [
+  ['append', normilizeArgs],
+  ['delete', stringify],
+  ['get',    stringify],
+  ['getAll', stringify],
+  ['has',    stringify],
+  ['set',    normilizeArgs]
+]) {
+  let orig = FormDataPolyfill.prototype[method]
+  FormDataPolyfill.prototype[method] = function() {
+    return orig.apply(this, overide(...arguments))
   }
 }
 
