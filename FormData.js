@@ -49,10 +49,7 @@ class FormDataPolyfill {
     if (!map[name])
       map[name] = []
 
-    if (!(value instanceof File) && !(value instanceof Blob) && typeof value != 'string') {
-      value += ''
-    }
-    map[name].push([value, filename])
+    map[name].push([value instanceof Blob ? value : value + '', filename])
   }
 
 
@@ -127,7 +124,7 @@ class FormDataPolyfill {
    * @return  {Array}   [name, value]
    */
   getAll(name) {
-    return (wm(this)[name += ''] || []).concat().map(v => v[0])
+    return (wm(this)[name += ''] || []).map(v => v[0])
   }
 
 
@@ -162,10 +159,7 @@ class FormDataPolyfill {
    * @return  {Undefined}
    */
   set(name, value, filename) {
-    if (!(value instanceof File) && !(value instanceof Blob) && typeof value != 'string') {
-      value += ''
-    }
-    wm(this)[name + ''] = [[value, filename]]
+    wm(this)[name + ''] = [[value instanceof Blob ? value : value + '', filename]]
   }
 
 
