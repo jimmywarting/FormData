@@ -2,7 +2,7 @@ const map = new WeakMap
 const wm = o => map.get(o)
 
 function normilizeValue(value) {
-  filename = value[1]
+  let filename = value[1]
   value = value[0]
   
   if (value instanceof Blob)
