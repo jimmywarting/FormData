@@ -3,7 +3,7 @@ const wm = o => map.get(o)
 
 function normilizeValue(value) {
   let filename = value[1]
-  let value = value[0]
+  value = value[0]
   
   if (value instanceof Blob)
     value = new File([value], filename, {
