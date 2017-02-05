@@ -1,10 +1,7 @@
 const map = new WeakMap
 const wm = o => map.get(o)
 
-function normilizeValue(value) {
-  filename = value[1]
-  value = value[0]
-  
+function normilizeValue([value, filename]) {
   if (value instanceof Blob)
     value = new File([value], filename, {
       type: value.type,
