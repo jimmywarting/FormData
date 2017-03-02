@@ -47,7 +47,7 @@ class FormDataPolyfill {
     if (!form)
       return this
 
-    for (let {name, type, value, files, checked, selectedOptions} of form.elements) {
+    for (let {name, type, value, files, checked, selectedOptions} of Array.from(form.elements)) {
       if(!name) continue
 
       if (type === 'file')
