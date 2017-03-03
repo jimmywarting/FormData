@@ -1,7 +1,7 @@
 const map = new WeakMap
 const wm = o => map.get(o)
 
-function normilizeValue([value, filename]) {
+function normalizeValue([value, filename]) {
   if (value instanceof Blob)
     value = new File([value], filename, {
       type: value.type,
@@ -18,7 +18,7 @@ function stringify(name) {
   return [name + '']
 }
 
-function normilizeArgs(name, value, filename) {
+function normalizeArgs(name, value, filename) {
   if (arguments.length < 2) 
     throw new TypeError(`2 arguments required, but only ${arguments.length} present.`)
     
@@ -103,7 +103,7 @@ class FormDataPolyfill {
 
     for (let name in map)
       for (let value of map[name])
-        yield [name, normilizeValue(value)]
+        yield [name, normalizeValue(value)]
   }
 
   /**
@@ -127,7 +127,7 @@ class FormDataPolyfill {
    */
   get(name) {
     let map = wm(this)
-    return map[name] ? normilizeValue(map[name][0]) : null
+    return map[name] ? normalizeValue(map[name][0]) : null
   }
 
 
@@ -138,7 +138,7 @@ class FormDataPolyfill {
    * @return  {Array}         [value, value]
    */
   getAll(name) {
-    return (wm(this)[name] || []).map(normilizeValue)
+    return (wm(this)[name] || []).map(normalizeValue)
   }
 
 
@@ -273,12 +273,12 @@ class FormDataPolyfill {
 }
 
 for (let [method, overide] of [
-  ['append', normilizeArgs],
+  ['append', normalizeArgs],
   ['delete', stringify],
   ['get',    stringify],
   ['getAll', stringify],
   ['has',    stringify],
-  ['set',    normilizeArgs]
+  ['set',    normalizeArgs]
 ]) {
   let orig = FormDataPolyfill.prototype[method]
   FormDataPolyfill.prototype[method] = function() {
