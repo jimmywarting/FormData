@@ -1,6 +1,6 @@
 {
   "name": "formdata-polyfill",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "HTML5 `FormData` polyfill for Browsers.",
   "main": "FormData.js",
   "scripts": {
