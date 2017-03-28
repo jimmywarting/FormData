@@ -224,7 +224,7 @@ class FormDataPolyfill {
    * @return {Blob} [description]
    */
   _blob() {
-    var boundary = '----FormDataPolyfill' + Math.random()
+    var boundary = '----formdata-polyfill-' + Math.random()
     var chunks = []
 
     for (let [name, value] of this) {
