@@ -25,6 +25,18 @@ fd = new FormData(form)
 fd._asNative() // returns a native formData with all the fields
 ```
 
+If you wish to monkey patch XHR to make it work out of the box
+then you have to do it yourself
+```js
+import FormData from 'formdata-polyfill'
+
+XMLHttpRequest = class extends XMLHttpRequest {
+  send(data) {
+    super.send(data instanceof FormData ? data._blob() : data)
+  }
+}
+```
+
 The current status of the native FormData is this
 [![skarmavbild 2016-10-19 kl 21 32 19](https://cloud.githubusercontent.com/assets/1148376/19534352/b7f42d8c-9643-11e6-91da-7f89580f51d8.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
 
