@@ -54,7 +54,7 @@ class FormDataPolyfill {
         for (let file of files)
           this.append(name, file)
       else if (type === 'select-multiple' || type === 'select-one')
-        for (let elm of selectedOptions)
+        for (let elm of Array.from(selectedOptions))
           this.append(name, elm.value)
       else if (type === 'checkbox')
         if (checked) this.append(name, value)
