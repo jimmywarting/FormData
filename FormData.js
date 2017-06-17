@@ -12,21 +12,21 @@ function normalizeValue([value, filename]) {
 }
 
 function stringify(name) {
-  if (!arguments.length) 
+  if (!arguments.length)
     throw new TypeError('1 argument required, but only 0 present.')
 
   return [name + '']
 }
 
 function normalizeArgs(name, value, filename) {
-  if (arguments.length < 2) 
+  if (arguments.length < 2)
     throw new TypeError(`2 arguments required, but only ${arguments.length} present.`)
-    
-  return value instanceof Blob 
-    ? [name + '', value, filename !== undefined 
-      ? filename + '' 
+
+  return value instanceof Blob
+    ? [name + '', value, filename !== undefined
+      ? filename + ''
       : value[Symbol.toStringTag] === 'File'
-        ? value.name 
+        ? value.name
         : 'Blob']
     : [name + '', value + '']
 }
@@ -151,7 +151,7 @@ class FormDataPolyfill {
   has(name) {
     return name in wm(this)
   }
-  
+
 
   /**
    * Iterate over all fields name
@@ -195,7 +195,7 @@ class FormDataPolyfill {
    */
   stream() {
     try {
-      return this._blob().stream()
+      return this['_blob']().stream()
     } catch(e) {
       throw new Error('Include https://github.com/jimmywarting/Screw-FileReader for streaming support')
     }
@@ -208,7 +208,7 @@ class FormDataPolyfill {
    *
    * @return {FormData}
    */
-  _asNative() {
+  ['_asNative']() {
     let fd = new FormData
 
     for (let [name, value] of this)
@@ -223,7 +223,7 @@ class FormDataPolyfill {
    *
    * @return {Blob} [description]
    */
-  _blob() {
+  ['_blob']() {
     var boundary = '----formdata-polyfill-' + Math.random()
     var chunks = []
 
@@ -286,4 +286,4 @@ for (let [method, overide] of [
   }
 }
 
-module.exports = FormDataPolyfill
+module['exports'] = FormDataPolyfill
