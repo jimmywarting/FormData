@@ -1,53 +1,54 @@
 const map = new WeakMap
 const wm = o => map.get(o)
-var Fil
 let type = obj => Object.prototype.toString.call(obj).slice(8, -1)
+
+if (window.Symbol && Symbol.toStringTag) {
+  if (!Blob.prototype[Symbol.toStringTag]) {
+    Blob.prototype[Symbol.toStringTag] = 'Blob'
+  }
+
+  if ('File' in window && !File.prototype[Symbol.toStringTag]) {
+    File.prototype[Symbol.toStringTag] = 'File'
+  }
+}
 
 try {
   new File([], '')
-  Fil = File
-} catch(e) {
-  /**
-   * @see http://www.w3.org/TR/FileAPI/#dfn-file
-   * @param {!Array<string|!Blob|!ArrayBuffer>=} chunks
-   * @param {string=} filename
-   * @param {{type: (string|undefined), lastModified: (number|undefined)}=}
-   *     opts
-   * @constructor
-   * @extends {Blob}
-   */
-  Fil = function File(chunks, filename, opts) {
-    var _this = new Blob(chunks, opts)
-    var modified = opts && opts.lastModified !== undefined ? new Date(opts.lastModified) : new Date
+} catch (a) {
+  window.File = function (b, d, c) {
+    var blob = new Blob(b, c)
+    var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date
 
-    Object.defineProperties(_this, {
+    Object.defineProperties(blob, {
       name: {
-        value: filename
+        value: d
       },
       lastModifiedDate: {
-        value: modified
+        value: t
       },
       lastModified: {
-        value: +modified
+        value: +t
       },
       toString: {
-        value() {
+        value: function () {
           return '[object File]'
         }
       }
     })
 
-    Object.defineProperty(_this, Symbol.toStringTag, {
-      value: 'File'
-    })
+    if (window.Symbol && Symbol.toStringTag) {
+      Object.defineProperty(blob, Symbol.toStringTag, {
+        value: 'File'
+      })
+    }
 
-    return _this
+    return blob
   }
 }
 
 function normalizeValue([value, filename]) {
   if (value instanceof Blob)
-    value = new Fil([value], filename, {
+    value = new File([value], filename, {
       type: value.type,
       lastModified: value.lastModified
     })
@@ -322,7 +323,9 @@ class FormDataPolyfill {
  *
  * @return {String} FormData
  */
-FormDataPolyfill.prototype[Symbol.toStringTag] = 'FormData'
+if (window.Symbol && Symbol.toStringTag) {
+  FormDataPolyfill.prototype[Symbol.toStringTag] = 'FormData'
+}
 
 for (let [method, overide] of [
   ['append', normalizeArgs],
