@@ -1,9 +1,53 @@
 const map = new WeakMap
 const wm = o => map.get(o)
+var Fil
+let type = obj => Object.prototype.toString.call(obj).slice(8, -1)
+
+try {
+  new File([], '')
+  Fil = File
+} catch(e) {
+  /**
+   * @see http://www.w3.org/TR/FileAPI/#dfn-file
+   * @param {!Array<string|!Blob|!ArrayBuffer>=} chunks
+   * @param {string=} filename
+   * @param {{type: (string|undefined), lastModified: (number|undefined)}=}
+   *     opts
+   * @constructor
+   * @extends {Blob}
+   */
+  Fil = function File(chunks, filename, opts) {
+    var _this = new Blob(chunks, opts)
+    var modified = opts && opts.lastModified !== undefined ? new Date(opts.lastModified) : new Date
+
+    Object.defineProperties(_this, {
+      name: {
+        value: filename
+      },
+      lastModifiedDate: {
+        value: modified
+      },
+      lastModified: {
+        value: +modified
+      },
+      toString: {
+        value() {
+          return '[object File]'
+        }
+      }
+    })
+
+    Object.defineProperty(_this, Symbol.toStringTag, {
+      value: 'File'
+    })
+
+    return _this
+  }
+}
 
 function normalizeValue([value, filename]) {
   if (value instanceof Blob)
-    value = new File([value], filename, {
+    value = new Fil([value], filename, {
       type: value.type,
       lastModified: value.lastModified
     })
@@ -25,7 +69,7 @@ function normalizeArgs(name, value, filename) {
   return value instanceof Blob
     ? [name + '', value, filename !== undefined
       ? filename + ''
-      : value[Symbol.toStringTag] === 'File'
+      : type(value) === 'File'
         ? value.name
         : 'Blob']
     : [name + '', value + '']
@@ -230,7 +274,7 @@ class FormDataPolyfill {
     for (let [name, value] of this) {
       chunks.push(`--${boundary}\r\n`)
 
-      if (value[Symbol.toStringTag] === 'File') {
+      if (value instanceof Blob) {
         chunks.push(
           `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n`,
           `Content-Type: ${value.type}\r\n\r\n`,
@@ -263,14 +307,22 @@ class FormDataPolyfill {
 
   /**
    * Create the default string description.
-   * It is accessed internally by the Object.prototype.toString().
    *
-   * @return {String} FormData
+   * @return  {String} [object FormData]
    */
-  get [Symbol.toStringTag]() {
-    return 'FormData'
+  toString() {
+    return '[object FormData]'
   }
 }
+
+
+/**
+ * Create the default string description.
+ * It is accessed internally by the Object.prototype.toString().
+ *
+ * @return {String} FormData
+ */
+FormDataPolyfill.prototype[Symbol.toStringTag] = 'FormData'
 
 for (let [method, overide] of [
   ['append', normalizeArgs],
