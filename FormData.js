@@ -101,7 +101,7 @@ class FormDataPolyfill {
       else if (type === 'select-multiple' || type === 'select-one')
         for (let elm of Array.from(selectedOptions))
           this.append(name, elm.value)
-      else if (type === 'checkbox') {
+      else if (type === 'checkbox' || type === 'radio') {
         if (checked) this.append(name, value)
       } else
         this.append(name, value)
