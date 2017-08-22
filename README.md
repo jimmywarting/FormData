@@ -8,8 +8,6 @@ A FormData polyfill
 npm install formdata-polyfill
 ```
 
-Meant to be used with babel, closer-compiler or equivalent (since it's written in es6 using class, WeakMap, Iterators, `for...of`)
-
 This doesn't monkey patch xhr#send like [Rob--W](https://github.com/Rob--W) did [here](https://gist.github.com/Rob--W/8b5adedd84c0d36aba64).
 However this provides you a way to convert the entire form to a blob and send it with xhr or fetch.
 ```javascript
