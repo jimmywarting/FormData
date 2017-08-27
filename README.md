@@ -36,7 +36,7 @@ XMLHttpRequest = class extends XMLHttpRequest {
 ```
 
 The current status of the native FormData is this
-[![skarmavbild 2016-10-19 kl 21 32 19](https://cloud.githubusercontent.com/assets/1148376/19534352/b7f42d8c-9643-11e6-91da-7f89580f51d8.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
+![skarmavbild 2017-08-27 kl 20 17 14](https://user-images.githubusercontent.com/1148376/29752796-b5ef2e3a-8b64-11e7-8fea-24c80fc2d5b6.png)
 
 
 This lib provides you all the function others don't include
