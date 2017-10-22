@@ -278,7 +278,7 @@ class FormDataPolyfill {
       if (value instanceof Blob) {
         chunks.push(
           `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n`,
-          `Content-Type: ${value.type}\r\n\r\n`,
+          `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
           value,
           '\r\n'
         )
