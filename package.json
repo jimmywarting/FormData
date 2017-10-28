@@ -1,10 +1,10 @@
 {
   "name": "formdata-polyfill",
-  "version": "2.0.5",
+  "version": "3.0.0",
   "description": "HTML5 `FormData` polyfill for Browsers.",
   "main": "formdata.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test\" && exit 1"
   },
   "repository": {
     "type": "git",
