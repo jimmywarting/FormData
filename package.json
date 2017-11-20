@@ -4,6 +4,8 @@
   "description": "HTML5 `FormData` polyfill for Browsers.",
   "main": "formdata.min.js",
   "scripts": {
+    "build": "google-closure-compiler --js_output_file formdata.min.js FormData.js",
+    "prepare": "npm run build",
     "test": "echo \"Error: no test\" && exit 1"
   },
   "repository": {
@@ -21,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/jimmywarting/FormData/issues"
   },
-  "homepage": "https://github.com/jimmywarting/FormData#readme"
+  "homepage": "https://github.com/jimmywarting/FormData#readme",
+  "devDependencies": {
+    "google-closure-compiler": "^20171112.0.0"
+  }
 }
