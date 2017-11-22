@@ -129,8 +129,8 @@ if (!window.FormData || !window.FormData.prototype.keys) {
           for (let file of elm.files)
             this.append(elm.name, file)
         else if (elm.type === 'select-multiple' || elm.type === 'select-one')
-          for (let elm of arrayFrom(elm.selectedOptions))
-            this.append(elm.name, elm.value)
+          for (let opt of arrayFrom(elm.selectedOptions))
+            this.append(opt.name, opt.value)
         else if (elm.type === 'checkbox' || elm.type === 'radio') {
           if (elm.checked) this.append(elm.name, elm.value)
         } else
