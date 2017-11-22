@@ -53,7 +53,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
           value: +t
         },
         toString: {
-          value: function () {
+          value() {
             return '[object File]'
           }
         }
@@ -123,7 +123,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
         return this
 
       for (let {name, type, value, files, checked, selectedOptions} of arrayFrom(form.elements)) {
-        if(!name) continue
+        if (!name) continue
 
         if (type === 'file')
           for (let file of files)
