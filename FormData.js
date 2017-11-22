@@ -334,13 +334,13 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   }
 
 
-  /**
-   * Create the default string description.
-   * It is accessed internally by the Object.prototype.toString().
-   *
-   * @return {String} FormData
-   */
   if (stringTag) {
+    /**
+     * Create the default string description.
+     * It is accessed internally by the Object.prototype.toString().
+     *
+     * @return {String} FormData
+     */
     FormDataPolyfill.prototype[stringTag] = 'FormData'
   }
 
