@@ -265,20 +265,6 @@ if (!window.FormData || !window.FormData.prototype.keys) {
 
 
     /**
-     * Non standard but it has been proposed: https://github.com/w3c/FileAPI/issues/40
-     *
-     * @return {ReadableStream}
-     */
-    stream() {
-      try {
-        return this['_blob']().stream()
-      } catch(e) {
-        throw new Error('Include https://github.com/jimmywarting/Screw-FileReader for streaming support')
-      }
-    }
-
-
-    /**
      * Return a native (perhaps degraded) FormData with only a `append` method
      * Can throw if it's not supported
      *
