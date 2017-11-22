@@ -4,7 +4,7 @@
   "description": "HTML5 `FormData` polyfill for Browsers.",
   "main": "formdata.min.js",
   "scripts": {
-    "build": "google-closure-compiler --js_output_file formdata.min.js FormData.js",
+    "build": "google-closure-compiler --compilation_level ADVANCED --js_output_file formdata.min.js FormData.js",
     "prepare": "npm run build",
     "test": "echo \"Error: no test\" && exit 1"
   },
