@@ -122,19 +122,19 @@ if (!window.FormData || !window.FormData.prototype.keys) {
       if (!form)
         return this
 
-      for (let {name, type, value, files, checked, selectedOptions} of arrayFrom(form.elements)) {
-        if (!name) continue
+      for (let elm of arrayFrom(form.elements)) {
+        if (!elm.name || elm.disabled) continue
 
-        if (type === 'file')
-          for (let file of files)
-            this.append(name, file)
-        else if (type === 'select-multiple' || type === 'select-one')
-          for (let elm of arrayFrom(selectedOptions))
-            this.append(name, elm.value)
-        else if (type === 'checkbox' || type === 'radio') {
-          if (checked) this.append(name, value)
+        if (elm.type === 'file')
+          for (let file of elm.files)
+            this.append(elm.name, file)
+        else if (elm.type === 'select-multiple' || elm.type === 'select-one')
+          for (let elm of arrayFrom(elm.selectedOptions))
+            this.append(elm.name, elm.value)
+        else if (elm.type === 'checkbox' || elm.type === 'radio') {
+          if (elm.checked) this.append(elm.name, elm.value)
         } else
-          this.append(name, value)
+          this.append(elm.name, elm.value)
       }
     }
 
