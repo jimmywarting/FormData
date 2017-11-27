@@ -344,19 +344,21 @@ if (!window.FormData || !window.FormData.prototype.keys) {
     FormDataPolyfill.prototype[stringTag] = 'FormData'
   }
 
-  for (let [method, decorator] of [
+  const decorations = [
     ['append', normalizeArgs],
     ['delete', stringify],
     ['get',    stringify],
     ['getAll', stringify],
     ['has',    stringify],
     ['set',    normalizeArgs]
-  ]) {
-    let orig = FormDataPolyfill.prototype[method]
+  ]
+
+  decorations.forEach(arr => {
+    const orig = FormDataPolyfill.prototype[arr[0]]
     FormDataPolyfill.prototype[method] = function() {
-      return orig.apply(this, decorator(...arguments))
+      return orig.apply(this, arr[1](arrayFrom(arguments)))
     }
-  }
+  })
 
   // Patch xhr's send method to call _blob transparently
   XMLHttpRequest.prototype.send = function(data) {
