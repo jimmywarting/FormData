@@ -1,3 +1,4 @@
+FormData = undefined
 // ==ClosureCompiler==
 // @output_file_name formdata.min.js
 // @compilation_level ADVANCED_OPTIMIZATIONS
@@ -356,7 +357,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   decorations.forEach(arr => {
     const orig = FormDataPolyfill.prototype[arr[0]]
     FormDataPolyfill.prototype[arr[0]] = function() {
-      return orig.apply(this, arr[1](arrayFrom(arguments)))
+      return orig.apply(this, arr[1].apply(this, arrayFrom(arguments)))
     }
   })
 
