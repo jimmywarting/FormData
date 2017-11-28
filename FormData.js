@@ -1,4 +1,3 @@
-FormData = undefined
 // ==ClosureCompiler==
 // @output_file_name formdata.min.js
 // @compilation_level ADVANCED_OPTIMIZATIONS
