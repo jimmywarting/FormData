@@ -2,9 +2,9 @@
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/jimmywarting/FormData.svg)](https://greenkeeper.io/)
 
-[![npm version][npm-image]][npm-url]
-
 [![Build Status](https://travis-ci.org/jimmywarting/FormData.svg?branch=master)](https://travis-ci.org/jimmywarting/FormData)
+
+[![npm version][npm-image]][npm-url]
 
 ```bash
 npm install formdata-polyfill
@@ -68,5 +68,5 @@ This polyfill normalizes support for the FormData API:
  - `entries()`, `keys()`, `values()`, and support for `for...of`
  - Available in web workers (just include the polyfill)
 
-  [npm-image]: https://img.shields.io/npm/v/formdata-polyfill.svg?style=flat-square
+  [npm-image]: https://img.shields.io/npm/v/formdata-polyfill.svg
   [npm-url]: https://www.npmjs.com/package/formdata-polyfill
