@@ -1,5 +1,7 @@
 # FormData
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jimmywarting/FormData.svg)](https://greenkeeper.io/)
+
 [![npm version][npm-image]][npm-url]
 
 ```bash
