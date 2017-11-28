@@ -4,6 +4,8 @@
 
 [![npm version][npm-image]][npm-url]
 
+[![Build Status](https://travis-ci.org/jimmywarting/FormData.svg?branch=master)](https://travis-ci.org/jimmywarting/FormData)
+
 ```bash
 npm install formdata-polyfill
 ```
