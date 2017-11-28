@@ -130,7 +130,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
             this.append(elm.name, file)
         else if (elm.type === 'select-multiple' || elm.type === 'select-one')
           for (let opt of arrayFrom(elm.selectedOptions))
-            this.append(opt.name, opt.value)
+            this.append(elm.name, opt.value)
         else if (elm.type === 'checkbox' || elm.type === 'radio') {
           if (elm.checked) this.append(elm.name, elm.value)
         } else
@@ -355,7 +355,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
 
   decorations.forEach(arr => {
     const orig = FormDataPolyfill.prototype[arr[0]]
-    FormDataPolyfill.prototype[method] = function() {
+    FormDataPolyfill.prototype[arr[0]] = function() {
       return orig.apply(this, arr[1](arrayFrom(arguments)))
     }
   })
