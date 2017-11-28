@@ -9,7 +9,8 @@ function create_formdata(...args) {
     return fd
 }
 
-
+// Some test are imported from
+// http://bit.ly/2zyG5yZ
 
 describe('FormData', () => {
   describe('append', () => {
@@ -83,4 +84,43 @@ describe('FormData', () => {
         assert.equal(fd.size, 0)
     })
   })
+
+  describe('has', () => {
+    it('FormData.has()', () => {
+      var fd = new FormData
+      fd.append('n1', 'value')
+      assert.equal(fd.has('n1'), true)
+      assert.equal(fd.has('n2'), false)
+      fd.append('n2', 'value')
+      assert.equal(fd.has('n1'), true)
+      assert.equal(fd.has('n2'), true)
+      fd.append('n3', new Blob(['content']))
+      assert.equal(fd.has('n3'), true)
+    })
+  })
+
+  describe('delete', () => {
+    it('FormData.delete()', () => {
+      var fd = new FormData
+      fd.append('name', 'value')
+      assert.equal(fd.has('name'), true)
+      fd.delete('name')
+      assert.equal(fd.has('name'), false)
+
+      fd.append('name', new Blob(['content']))
+      assert.equal(fd.has('name'), true)
+      fd.delete('name')
+      assert.equal(fd.has('name'), false)
+
+      fd.append('n1', 'v1')
+      fd.append('n2', 'v2')
+      fd.append('n1', 'v3')
+      fd.delete('n1')
+      assert.equal(fd.has('n1'), false)
+
+      assert.deepEqual([...fd], [['n2', 'v2']])
+    })
+  })
+
+
 })
