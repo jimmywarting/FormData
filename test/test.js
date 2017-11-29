@@ -1,5 +1,14 @@
-const native = window.FormData
+const nativeFormData = window.FormData
+const nativeFile = window.File
 window.FormData = undefined
+
+// Want to simulate the kind of error we get in
+// old safari & ie when constructing a file
+window.File = new Proxy(nativeFile, {
+  construct(target, args) {
+    throw new Error
+  }
+})
 
 function create_formdata(...args) {
     const fd = new FormData
@@ -119,6 +128,19 @@ describe('FormData', () => {
       assert.equal(fd.has('n1'), false)
 
       assert.deepEqual([...fd], [['n2', 'v2']])
+    })
+  })
+
+  describe('filename', () => {
+    // #43
+    // Old ie don't have Symbol.toStringTag and the polyfill was
+    // therefore not able to change the
+    // `Object.prototype.toString.call` to return correct type of the polyfilled
+    // File constructor
+    it('Shold return correct filename', () => {
+      const fd = create_formdata(['key', new nativeFile([], 'doc.txt')])
+      const mockFile = fd.get('key')
+      assert.equal('doc.txt', mockFile.name)
     })
   })
 

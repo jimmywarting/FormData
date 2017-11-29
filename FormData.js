@@ -20,7 +20,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   const stringTag = window.Symbol && Symbol.toStringTag
   const map = new WeakMap
   const wm = o => map.get(o)
-  const type = obj => Object.prototype.toString.call(obj).slice(8, -1)
+  const type = obj => obj.toString().slice(8, -1)
   const arrayFrom = Array.from || (obj => [].slice.call(obj))
 
   // Add missing stringTags to blob and files
