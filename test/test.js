@@ -137,10 +137,22 @@ describe('FormData', () => {
     // therefore not able to change the
     // `Object.prototype.toString.call` to return correct type of the polyfilled
     // File constructor
-    it('Shold return correct filename', () => {
+    it('Shold return correct filename with File', () => {
       const fd = create_formdata(['key', new nativeFile([], 'doc.txt')])
       const mockFile = fd.get('key')
       assert.equal('doc.txt', mockFile.name)
+    })
+
+    it('Shold return correct filename with Blob filename', () => {
+      const fd = create_formdata(['key', new Blob, 'doc.txt'])
+      const mockFile = fd.get('key')
+      assert.equal('doc.txt', mockFile.name)
+    })
+
+    it('Shold return correct filename with just Blob', () => {
+      const fd = create_formdata(['key', new Blob])
+      const mockFile = fd.get('key')
+      assert.equal('Blob', mockFile.name)
     })
   })
 
