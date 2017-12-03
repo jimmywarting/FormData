@@ -362,7 +362,16 @@ if (!window.FormData || !window.FormData.prototype.keys) {
 
   // Patch xhr's send method to call _blob transparently
   XMLHttpRequest.prototype.send = function(data) {
-    _send.call(this, data instanceof FormDataPolyfill ? data['_blob']() : data)
+    // I would check if Content-Type isn't already set
+    // But xhr lacks getRequestHeaders functionallity
+    // https://github.com/jimmywarting/FormData/issues/44
+    if (data instanceof FormDataPolyfill) {
+      const blob = data._blob()
+      this.setRequestHeader('Content-Type', blob.type)
+      _send.call(this, blob)
+    } else {
+      _send.call(this, data)
+    }
   }
 
   // Patch fetch's function to call _blob transparently
