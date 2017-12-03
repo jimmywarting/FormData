@@ -366,7 +366,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
     // But xhr lacks getRequestHeaders functionallity
     // https://github.com/jimmywarting/FormData/issues/44
     if (data instanceof FormDataPolyfill) {
-      const blob = data._blob()
+      const blob = data['_blob']()
       this.setRequestHeader('Content-Type', blob.type)
       _send.call(this, blob)
     } else {
