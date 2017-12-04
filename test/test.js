@@ -11,11 +11,17 @@ window.File = new Proxy(nativeFile, {
 })
 
 function create_formdata(...args) {
-    const fd = new FormData
+    const fd = new FormData()
     for (let arg of args) {
         fd.append(...arg)
     }
     return fd
+}
+
+function create_form(str) {
+  var form = document.createElement('form')
+  form.innerHTML = str
+  return new FormData(form)
 }
 
 // Some test are imported from
@@ -154,6 +160,23 @@ describe('FormData', () => {
       const mockFile = fd.get('key')
       assert.equal('Blob', mockFile.name)
     })
+  })
+
+  describe('constructor', () => {
+    // #45
+    it('Shold return selected items', () => {
+      const fd = create_form(`
+        <select multiple name="example">
+          <option selected value="volvo">Volvo</option>
+          <option selected value="saab">Saab</option>
+          <option value="mercedes">Mercedes</option>
+          <option value="audi">Audi</option>
+        </select>
+      `)
+
+      assert.deepEqual([...fd], [['example', 'volvo'], ['example', 'saab']])
+    })
+
   })
 
 
