@@ -20,7 +20,6 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   const stringTag = window.Symbol && Symbol.toStringTag
   const map = new WeakMap
   const wm = o => map.get(o)
-  const type = obj => obj.toString().slice(8, -1)
   const arrayFrom = Array.from || (obj => [].slice.call(obj))
 
   // Add missing stringTags to blob and files
@@ -98,7 +97,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
       // normalize name and filename if adding an attachment
       ? [name + '', value, filename !== undefined
         ? filename + '' // Cast filename to string if 3th arg isn't undefined
-        : type(value) === 'File' // if it's a File
+        : typeof value.name === 'string' // if name prop exist
           ? value.name // Use File.name
           : 'Blob'] // otherwise fallback to Blob
 
