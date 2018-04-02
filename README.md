@@ -22,7 +22,7 @@ so if you are constructing them with FormData you need to call `fd._blob()` manu
 ```js
 new Request(url, {
   method: 'post',
-  body: fd._blob ? fd.blob() : fd
+  body: fd._blob ? fd._blob() : fd
 })
 ```
 
