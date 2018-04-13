@@ -1,23 +1,21 @@
-// ==ClosureCompiler==
-// @output_file_name formdata.min.js
-// @compilation_level ADVANCED_OPTIMIZATIONS
-// ==/ClosureCompiler==
-
-if (!window.FormData || !window.FormData.prototype.keys) {
+if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
+  const global = typeof window === 'object'
+    ? window : typeof self === 'object'
+    ? self : this
 
   // keep a reference to native implementation
-  const _FormData = window.FormData
+  const _FormData = global.FormData
 
   // To be monkey patched
-  const _send = window.XMLHttpRequest.prototype.send
-  const _fetch = window.Request && window.fetch
+  const _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send
+  const _fetch = global.Request && global.fetch
 
   // Unable to patch Request constructor correctly
-  // const _Request = window.Request
+  // const _Request = global.Request
   // only way is to use ES6 class extend
   // https://github.com/babel/babel/issues/1966
 
-  const stringTag = window.Symbol && Symbol.toStringTag
+  const stringTag = global.Symbol && Symbol.toStringTag
   const map = new WeakMap
   const wm = o => map.get(o)
   const arrayFrom = Array.from || (obj => [].slice.call(obj))
@@ -28,7 +26,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
       Blob.prototype[stringTag] = 'Blob'
     }
 
-    if ('File' in window && !File.prototype[stringTag]) {
+    if ('File' in global && !File.prototype[stringTag]) {
       File.prototype[stringTag] = 'File'
     }
   }
@@ -37,7 +35,7 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   try {
     new File([], '')
   } catch (a) {
-    window.File = function(b, d, c) {
+    global.File = function(b, d, c) {
       const blob = new Blob(b, c)
       const t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date
 
@@ -360,24 +358,26 @@ if (!window.FormData || !window.FormData.prototype.keys) {
   })
 
   // Patch xhr's send method to call _blob transparently
-  XMLHttpRequest.prototype.send = function(data) {
-    // I would check if Content-Type isn't already set
-    // But xhr lacks getRequestHeaders functionallity
-    // https://github.com/jimmywarting/FormData/issues/44
-    if (data instanceof FormDataPolyfill) {
-      const blob = data['_blob']()
-      this.setRequestHeader('Content-Type', blob.type)
-      _send.call(this, blob)
-    } else {
-      _send.call(this, data)
+  if (_send) {
+      XMLHttpRequest.prototype.send = function(data) {
+      // I would check if Content-Type isn't already set
+      // But xhr lacks getRequestHeaders functionallity
+      // https://github.com/jimmywarting/FormData/issues/44
+      if (data instanceof FormDataPolyfill) {
+        const blob = data['_blob']()
+        this.setRequestHeader('Content-Type', blob.type)
+        _send.call(this, blob)
+      } else {
+        _send.call(this, data)
+      }
     }
   }
 
   // Patch fetch's function to call _blob transparently
   if (_fetch) {
-    const _fetch = window.fetch
+    const _fetch = global.fetch
 
-    window.fetch = function(input, init) {
+    global.fetch = function(input, init) {
       if (init && init.body && init.body instanceof FormDataPolyfill) {
         init.body = init.body['_blob']()
       }
@@ -386,5 +386,5 @@ if (!window.FormData || !window.FormData.prototype.keys) {
     }
   }
 
-  window['FormData'] = FormDataPolyfill
+  global['FormData'] = FormDataPolyfill
 }
