@@ -6,7 +6,7 @@ const { URLSearchParams } = require('url')
 const code = fs.readFileSync('./FormData.js', 'utf8').toString()
 
 // Build the post string from an object
-const post_data = new URLSearchParams({
+const postData = new URLSearchParams({
   compilation_level: 'ADVANCED_OPTIMIZATIONS',
   output_format: 'text',
   output_info: 'compiled_code',
@@ -16,18 +16,18 @@ const post_data = new URLSearchParams({
 }).toString()
 
 // An object of options to indicate where to post to
-const post_options = {
+const options = {
   host: 'closure-compiler.appspot.com',
   path: '/compile',
   method: 'POST',
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Content-Length': Buffer.byteLength(post_data)
+    'Content-Length': Buffer.byteLength(postData)
   }
 }
 
 // Set up the request
-const post_req = https.request(post_options, res => {
+const req = https.request(options, res => {
   res.setEncoding('utf8')
 
   if (res.statusCode !== 200) {
@@ -39,5 +39,5 @@ const post_req = https.request(post_options, res => {
 })
 
 // post the data
-post_req.write(post_data)
-post_req.end()
+req.write(postData)
+req.end()
