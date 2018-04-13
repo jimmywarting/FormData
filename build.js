@@ -11,6 +11,7 @@ const post_data = new URLSearchParams({
   output_format: 'text',
   output_info: 'compiled_code',
   warning_level: 'QUIET',
+  output_wrapper: ';(function(){%output%})();',
   js_code: code
 }).toString()
 
