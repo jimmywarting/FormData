@@ -97,7 +97,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
         ? filename + '' // Cast filename to string if 3th arg isn't undefined
         : typeof value.name === 'string' // if name prop exist
           ? value.name // Use File.name
-          : 'Blob'] // otherwise fallback to Blob
+          : 'blob'] // otherwise fallback to Blob
 
       // If no attachment, just cast the args to strings
       : [name + '', value + '']
