@@ -127,7 +127,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
             this.append(elm.name, file)
         else if (elm.type === 'select-multiple' || elm.type === 'select-one')
           for (let opt of arrayFrom(elm.options))
-            opt.selected && this.append(elm.name, opt.value)
+            !opt.disabled && opt.selected && this.append(elm.name, opt.value)
         else if (elm.type === 'checkbox' || elm.type === 'radio') {
           if (elm.checked) this.append(elm.name, elm.value)
         } else
