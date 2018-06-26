@@ -172,7 +172,7 @@ window.File = new Proxy(nativeFile, {
     describe('disabled', () => {
       it('Shold not include disabled fields', () => {
         const fd = create_form(
-          `<input name=foo value=bar>`
+          `<input disabled name=foo value=bar>`
         )
         assert.deepEqual([...fd], [])
       })
