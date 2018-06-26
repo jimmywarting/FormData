@@ -169,6 +169,26 @@ window.File = new Proxy(nativeFile, {
       })
     })
 
+    describe('disabled', () => {
+      it('Shold not include disabled fields', () => {
+        const fd = create_form(
+          `<input name=foo value=bar>`
+        )
+        assert.deepEqual([...fd], [])
+      })
+
+      // #56
+      it('Select elements where the option is both selected and disabled should not be included', () => {
+        const fd = create_form(`
+          <select multiple name="example">
+            <option selected disabled value="foo">Please choose one</option>
+          </select>
+        `)
+
+        assert.equal([...fd].length, 0)
+      })
+    })
+
     describe('constructor', () => {
       // #45
       it('Shold return selected items', () => {
@@ -182,17 +202,6 @@ window.File = new Proxy(nativeFile, {
         `)
 
         assert.deepEqual([...fd], [['example', 'volvo'], ['example', 'saab']])
-      })
-
-      // #56
-      it('Select elements where the option is both selected and disabled should not be included', () => {
-        const fd = create_form(`
-          <select multiple name="example">
-            <option selected disabled value="foo">Please choose one</option>
-          </select>
-        `)
-
-        assert.equal([...fd].length, 0)
       })
     })
   })
