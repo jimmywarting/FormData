@@ -123,7 +123,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
         if (!elm.name || elm.disabled) continue
 
         if (elm.type === 'file')
-          for (let file of elm.files)
+          for (let file of arrayFrom(elm.files || []))
             this.append(elm.name, file)
         else if (elm.type === 'select-multiple' || elm.type === 'select-one')
           for (let opt of arrayFrom(elm.options))
