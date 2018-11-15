@@ -120,7 +120,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
         return this
 
       for (let elm of arrayFrom(form.elements)) {
-        if (!elm.name || elm.disabled) continue
+        if (!elm.name || elm.disabled || elm.type === 'submit' || elm.type === 'button') continue
 
         if (elm.type === 'file')
           for (let file of arrayFrom(elm.files || []))
