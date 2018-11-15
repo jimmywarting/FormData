@@ -203,6 +203,17 @@ window.File = new Proxy(nativeFile, {
 
         assert.deepEqual([...fd], [['example', 'volvo'], ['example', 'saab']])
       })
+
+      // #62
+      it('Should not add buttons to FormData', () => {
+        const fd = create_form(`
+          <input type="text" name="username" value="bob">
+          <input type="submit" value="rename" name="action">
+          <input type="submit" value="find_n_delete" name="action">
+        `)
+
+        assert.deepEqual([...fd], [['username', 'bob']])
+      })
     })
   })
 })
