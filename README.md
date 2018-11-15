@@ -60,8 +60,10 @@ var fd = new FormData(form)
 xhr.send(fd)
 ```
 
-The status of the native FormData (2016-10-19) is:
-[![skarmavbild 2016-10-19 kl 21 32 19](https://cloud.githubusercontent.com/assets/1148376/19534352/b7f42d8c-9643-11e6-91da-7f89580f51d8.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
+The status of the native FormData (2018-11-15) is:
+[![skarmavbild 2018-11-15 kl 20 16 36](https://user-images.githubusercontent.com/1148376/48575973-99df5180-e913-11e8-8456-24f274d70fab.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
+
+
 
 This polyfill normalizes support for the FormData API:
 
