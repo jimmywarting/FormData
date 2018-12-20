@@ -169,6 +169,40 @@ window.File = new Proxy(nativeFile, {
       })
     })
 
+    describe('linefeeds', () => {
+      // Native FormData converts LF linefeeds provided by user input to CRLF
+      // In order to be consistent the polyfill should do the same
+      it('Should convert LF linefeed to CRLF when constructed from form element', () => {
+        // This can not be tested with 'create_form' as the function ignores \n
+        const form = document.createElement('form')
+        const textarea = document.createElement('textarea')
+        textarea.name = 'key'
+        textarea.value = '\n'
+        form.appendChild(textarea)
+        const fd = new FormData(form)
+        const value = fd.get('key')
+        assert.equal('\r\n', value)
+      })
+
+      it('Should normalize mixed linefeeds to CRLF when constructed from form element', () => {
+        // This can not be tested with 'create_form' as the function ignores \n
+        const form = document.createElement('form')
+        const textarea = document.createElement('textarea')
+        textarea.name = 'key'
+        textarea.value = 'a\na\r\na\n\r\n\r\n\r\n\na'
+        form.appendChild(textarea)
+        const fd = new FormData(form)
+        const value = fd.get('key')
+        assert.equal('a\r\na\r\na\r\n\r\n\r\n\r\n\r\na', value)
+      })
+
+      it('Should not convert LF to CRLF when provided by append', () => {
+        const fd = create_formdata(['key', '\n'])
+        const value = fd.get('key')
+        assert.equal('\n', value)
+      })
+    })
+
     describe('disabled', () => {
       it('Shold not include disabled fields', () => {
         const fd = create_form(

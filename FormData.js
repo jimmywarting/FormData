@@ -103,6 +103,13 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
       : [name + '', value + '']
   }
 
+  function normalizeInput(value) {
+    if (typeof value === "string") {
+      value = value.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n");
+    }
+    return value
+  }
+
   function each (arr, cb) {
     for (let i = 0; i < arr.length; i++) {
       cb(arr[i])
@@ -136,12 +143,12 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
           })
         } else if (elm.type === 'select-multiple' || elm.type === 'select-one') {
           each(elm.options, opt => {
-            !opt.disabled && opt.selected && self.append(elm.name, opt.value)
+            !opt.disabled && opt.selected && self.append(elm.name, normalizeInput(opt.value))
           })
         } else if (elm.type === 'checkbox' || elm.type === 'radio') {
-          if (elm.checked) self.append(elm.name, elm.value)
+          if (elm.checked) self.append(elm.name, normalizeInput(elm.value))
         } else {
-          self.append(elm.name, elm.value)
+          self.append(elm.name, normalizeInput(elm.value))
         }
       })
     }
