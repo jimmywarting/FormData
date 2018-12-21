@@ -103,9 +103,11 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
       : [name + '', value + '']
   }
 
-  function normalizeInput(value) {
+  // normalize linefeeds for textareas
+  // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
+  function normalizeLinefeeds(value) {
     if (typeof value === "string") {
-      value = value.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n");
+      value = value.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n")
     }
     return value
   }
@@ -143,12 +145,13 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
           })
         } else if (elm.type === 'select-multiple' || elm.type === 'select-one') {
           each(elm.options, opt => {
-            !opt.disabled && opt.selected && self.append(elm.name, normalizeInput(opt.value))
+            !opt.disabled && opt.selected && self.append(elm.name, opt.value)
           })
         } else if (elm.type === 'checkbox' || elm.type === 'radio') {
-          if (elm.checked) self.append(elm.name, normalizeInput(elm.value))
+          if (elm.checked) self.append(elm.name, elm.value)
         } else {
-          self.append(elm.name, normalizeInput(elm.value))
+          const value = elm.type === 'textarea' ? normalizeLinefeeds(elm.value) : elm.value
+          self.append(elm.name, value)
         }
       })
     }
