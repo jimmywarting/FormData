@@ -103,6 +103,15 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
       : [name + '', value + '']
   }
 
+  // normalize linefeeds for textareas
+  // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
+  function normalizeLinefeeds(value) {
+    if (typeof value === "string") {
+      value = value.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n")
+    }
+    return value
+  }
+
   function each (arr, cb) {
     for (let i = 0; i < arr.length; i++) {
       cb(arr[i])
@@ -141,7 +150,8 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
         } else if (elm.type === 'checkbox' || elm.type === 'radio') {
           if (elm.checked) self.append(elm.name, elm.value)
         } else {
-          self.append(elm.name, elm.value)
+          const value = elm.type === 'textarea' ? normalizeLinefeeds(elm.value) : elm.value
+          self.append(elm.name, value)
         }
       })
     }
