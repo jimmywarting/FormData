@@ -1,28 +1,29 @@
+/* global it describe assert expect Blob FormData */
 const native = window.FormData
 window.FormData = undefined
 
 class Polyfill {
-  constructor(args) {
+  constructor (args) {
     return new FormData(args)
   }
 }
 
-const nativeFile = window.File
+const NativeFile = window.File
 // Want to simulate the kind of error we get in
 // old safari & ie when constructing a file
-window.File = new Proxy(nativeFile, {
-  construct(target, args) {
-    throw new Error
+window.File = new Proxy(NativeFile, {
+  construct (target, args) {
+    throw new Error()
   }
 })
 
 ;[native, Polyfill].forEach(FormData => {
-  function create_formdata(...args) {
-      const fd = new FormData()
-      for (let arg of args) {
-          fd.append(...arg)
-      }
-      return fd
+  function createFormData(...args) {
+    const fd = new FormData()
+    for (let arg of args) {
+      fd.append(...arg)
+    }
+    return fd
   }
 
   function create_form(str) {
@@ -36,80 +37,94 @@ window.File = new Proxy(nativeFile, {
 
   describe('FormData ' + (FormData === native ? 'native' : 'polyfill'), () => {
     describe('append', () => {
+      it('throwOnFewArgs', () => {
+        expect(() => {
+          var fd = new FormData()
+          fd.append('key')
+        }).throw()
+      })
+
       it('testFormDataAppend1', () => {
-          assert.equal(create_formdata(['key', 'value1']).get('key'), 'value1')
+        assert.equal(createFormData(['key', 'value1']).get('key'), 'value1')
       })
 
       it('testFormDataAppend2', () => {
-          assert.equal(create_formdata(['key', 'value2'], ['key', 'value1']).get('key'), 'value2')
+        assert.equal(createFormData(['key', 'value2'], ['key', 'value1']).get('key'), 'value2')
       })
 
       it('testFormDataAppendUndefined1', () => {
-          assert.equal(create_formdata(['key', undefined]).get('key'), 'undefined')
+        assert.equal(createFormData(['key', undefined]).get('key'), 'undefined')
       })
 
       it('testFormDataAppendUndefined2', () => {
-          assert.equal(create_formdata(['key', undefined], ['key', 'value1']).get('key'), 'undefined')
+        assert.equal(createFormData(['key', undefined], ['key', 'value1']).get('key'), 'undefined')
       })
 
       it('testFormDataAppendNull1', () => {
-          assert.equal(create_formdata(['key', null]).get('key'), 'null')
+        assert.equal(createFormData(['key', null]).get('key'), 'null')
       })
 
       it('testFormDataAppendNull2', () => {
-          assert.equal(create_formdata(['key', null], ['key', 'value1']).get('key'), 'null')
+        assert.equal(createFormData(['key', null], ['key', 'value1']).get('key'), 'null')
       })
 
       it('testFormDataAppendToForm1', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', 'value1')
-          assert.equal(fd.get('key'), 'value1')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', 'value1')
+        assert.equal(fd.get('key'), 'value1')
       })
 
       it('testFormDataAppendToForm2', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', 'value2')
-          fd.append('key', 'value1')
-          assert.equal(fd.get('key'), 'value2')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', 'value2')
+        fd.append('key', 'value1')
+        assert.equal(fd.get('key'), 'value2')
       })
 
       it('testFormDataAppendToFormUndefined1', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', undefined)
-          assert.equal(fd.get('key'), 'undefined')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', undefined)
+        assert.equal(fd.get('key'), 'undefined')
       })
 
       it('testFormDataAppendToFormUndefined2', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', undefined)
-          fd.append('key', 'value1')
-          assert.equal(fd.get('key'), 'undefined')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', undefined)
+        fd.append('key', 'value1')
+        assert.equal(fd.get('key'), 'undefined')
       })
 
       it('testFormDataAppendToFormNull1', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', null)
-          assert.equal(fd.get('key'), 'null')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', null)
+        assert.equal(fd.get('key'), 'null')
       })
 
       it('testFormDataAppendToFormNull2', () => {
-          var fd = new FormData(document.createElement('form'))
-          fd.append('key', null)
-          fd.append('key', 'value1')
-          assert.equal(fd.get('key'), 'null')
+        var fd = new FormData(document.createElement('form'))
+        fd.append('key', null)
+        fd.append('key', 'value1')
+        assert.equal(fd.get('key'), 'null')
       })
 
       it('testFormDataAppendEmptyBlob', () => {
-          var fd = create_formdata(['key', new Blob, 'blank.txt']).get('key')
-          assert.equal(fd.name, 'blank.txt')
-          assert.equal(fd.type, '')
-          assert.equal(fd.size, 0)
+        var fd = createFormData(['key', new Blob(), 'blank.txt']).get('key')
+        assert.equal(fd.name, 'blank.txt')
+        assert.equal(fd.type, '')
+        assert.equal(fd.size, 0)
       })
     })
 
     describe('has', () => {
+      it('throwOnFewArgs', () => {
+        expect(() => {
+          var fd = new FormData()
+          fd.has()
+        }).throw()
+      })
+
       it('FormData.has()', () => {
-        var fd = new FormData
+        var fd = new FormData()
         fd.append('n1', 'value')
         assert.equal(fd.has('n1'), true)
         assert.equal(fd.has('n2'), false)
@@ -122,8 +137,15 @@ window.File = new Proxy(nativeFile, {
     })
 
     describe('delete', () => {
+      it('throwOnFewArgs', () => {
+        expect(() => {
+          var fd = new FormData()
+          fd.delete()
+        }).throw()
+      })
+
       it('FormData.delete()', () => {
-        var fd = new FormData
+        var fd = new FormData()
         fd.append('name', 'value')
         assert.equal(fd.has('name'), true)
         fd.delete('name')
@@ -151,19 +173,19 @@ window.File = new Proxy(nativeFile, {
       // `Object.prototype.toString.call` to return correct type of the polyfilled
       // File constructor
       it('Shold return correct filename with File', () => {
-        const fd = create_formdata(['key', new nativeFile([], 'doc.txt')])
+        const fd = createFormData(['key', new NativeFile([], 'doc.txt')])
         const mockFile = fd.get('key')
         assert.equal('doc.txt', mockFile.name)
       })
 
       it('Shold return correct filename with Blob filename', () => {
-        const fd = create_formdata(['key', new Blob, 'doc.txt'])
+        const fd = createFormData(['key', new Blob(), 'doc.txt'])
         const mockFile = fd.get('key')
         assert.equal('doc.txt', mockFile.name)
       })
 
       it('Shold return correct filename with just Blob', () => {
-        const fd = create_formdata(['key', new Blob])
+        const fd = createFormData(['key', new Blob()])
         const mockFile = fd.get('key')
         assert.equal('blob', mockFile.name)
       })
@@ -207,13 +229,13 @@ window.File = new Proxy(nativeFile, {
       })
 
       it('Should not convert LF to CRLF when provided by append', () => {
-        const fd = create_formdata(['key', '\n'])
+        const fd = createFormData(['key', '\n'])
         const value = fd.get('key')
         assert.equal('\n', value)
       })
 
       it('Should not convert CR to CRLF when provided by append', () => {
-        const fd = create_formdata(['key', '\r'])
+        const fd = createFormData(['key', '\r'])
         const value = fd.get('key')
         assert.equal('\r', value)
       })

@@ -1,7 +1,10 @@
-if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
+/* global FormData self Blob File */
+/* eslint-disable no-inner-declarations */
+
+if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.prototype.keys)) {
   const global = typeof window === 'object'
-    ? window : typeof self === 'object'
-    ? self : this
+    ? window
+    : typeof self === 'object' ? self : this
 
   // keep a reference to native implementation
   const _FormData = global.FormData
@@ -16,9 +19,8 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
   // https://github.com/babel/babel/issues/1966
 
   const stringTag = global.Symbol && Symbol.toStringTag
-  const map = new WeakMap
+  const map = new WeakMap()
   const wm = o => map.get(o)
-  const arrayFrom = Array.from || (obj => [].slice.call(obj))
 
   // Add missing stringTags to blob and files
   if (stringTag) {
@@ -33,11 +35,11 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
 
   // Fix so you can construct your own File
   try {
-    new File([], '')
+    new File([], '') // eslint-disable-line
   } catch (a) {
-    global.File = function(b, d, c) {
+    global.File = function File (b, d, c) {
       const blob = new Blob(b, c)
-      const t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date
+      const t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date()
 
       Object.defineProperties(blob, {
         name: {
@@ -50,7 +52,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
           value: +t
         },
         toString: {
-          value() {
+          value () {
             return '[object File]'
           }
         }
@@ -66,50 +68,42 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
     }
   }
 
-  function normalizeValue([value, filename]) {
-    if (value instanceof Blob)
+  function normalizeValue ([value, filename]) {
+    if (value instanceof Blob) {
       // Should always returns a new File instance
       // console.assert(fd.get(x) !== fd.get(x))
       value = new File([value], filename, {
         type: value.type,
         lastModified: value.lastModified
       })
+    }
 
     return value
   }
 
-  function stringify(name) {
-    if (!arguments.length)
-      throw new TypeError('1 argument required, but only 0 present.')
-
-    return [name + '']
+  function ensureArgs (args, expected) {
+    if (args.length < expected) {
+      throw new TypeError(`${expected} argument required, but only ${args.length} present.`)
+    }
   }
 
-  function normalizeArgs(name, value, filename) {
-    if (arguments.length < 2)
-      throw new TypeError(
-        `2 arguments required, but only ${arguments.length} present.`
-      )
-
+  function normalizeArgs (name, value, filename) {
     return value instanceof Blob
       // normalize name and filename if adding an attachment
-      ? [name + '', value, filename !== undefined
+      ? [String(name), value, filename !== undefined
         ? filename + '' // Cast filename to string if 3th arg isn't undefined
         : typeof value.name === 'string' // if name prop exist
           ? value.name // Use File.name
           : 'blob'] // otherwise fallback to Blob
 
       // If no attachment, just cast the args to strings
-      : [name + '', value + '']
+      : [String(name), String(value)]
   }
 
   // normalize linefeeds for textareas
   // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
-  function normalizeLinefeeds(value) {
-    if (typeof value === "string") {
-      value = value.replace(/\r\n/g, "\n").replace(/\n/g, "\r\n")
-    }
-    return value
+  function normalizeLinefeeds (value) {
+    return value.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
   }
 
   function each (arr, cb) {
@@ -122,17 +116,15 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
    * @implements {Iterable}
    */
   class FormDataPolyfill {
-
     /**
      * FormData class
      *
      * @param {HTMLElement=} form
      */
-    constructor(form) {
+    constructor (form) {
       map.set(this, Object.create(null))
 
-      if (!form)
-        return this
+      if (!form) return this
 
       const self = this
 
@@ -156,7 +148,6 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
       })
     }
 
-
     /**
      * Append a field
      *
@@ -165,15 +156,15 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String=}          filename  filename to use with blob
      * @return  {Undefined}
      */
-    append(name, value, filename) {
+    append (name, value, filename) {
+      ensureArgs(arguments, 2)
+      ;[name, value, filename] = normalizeArgs.apply(null, arguments)
       const map = wm(this)
 
-      if (!map[name])
-        map[name] = []
+      if (!map[name]) map[name] = []
 
       map[name].push([value, filename])
     }
-
 
     /**
      * Delete all fields values given name
@@ -181,22 +172,24 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String}  name  Field name
      * @return  {Undefined}
      */
-    delete(name) {
-      delete wm(this)[name]
+    delete (name) {
+      ensureArgs(arguments, 1)
+      delete wm(this)[String(name)]
     }
-
 
     /**
      * Iterate over all fields as [name, value]
      *
      * @return {Iterator}
      */
-    *entries() {
+    * entries () {
       const map = wm(this)
 
-      for (let name in map)
-        for (let value of map[name])
+      for (let name in map) {
+        for (let value of map[name]) {
           yield [name, normalizeValue(value)]
+        }
+      }
     }
 
     /**
@@ -206,11 +199,12 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {Object=}   thisArg   `this` context for callback function
      * @return  {Undefined}
      */
-    forEach(callback, thisArg) {
-      for (let [name, value] of this)
+    forEach (callback, thisArg) {
+      ensureArgs(arguments, 1)
+      for (let [name, value] of this) {
         callback.call(thisArg, value, name, this)
+      }
     }
-
 
     /**
      * Return first field value given name
@@ -219,11 +213,12 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String}  name      Field name
      * @return  {String|File|null}  value Fields value
      */
-    get(name) {
+    get (name) {
+      ensureArgs(arguments, 1)
       const map = wm(this)
+      name = String(name)
       return map[name] ? normalizeValue(map[name][0]) : null
     }
-
 
     /**
      * Return all fields values given name
@@ -231,10 +226,10 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String}  name  Fields name
      * @return  {Array}         [{String|File}]
      */
-    getAll(name) {
-      return (wm(this)[name] || []).map(normalizeValue)
+    getAll (name) {
+      ensureArgs(arguments, 1)
+      return (wm(this)[String(name)] || []).map(normalizeValue)
     }
-
 
     /**
      * Check for field name existence
@@ -242,21 +237,21 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String}   name  Field name
      * @return  {boolean}
      */
-    has(name) {
-      return name in wm(this)
+    has (name) {
+      ensureArgs(arguments, 1)
+      return String(name) in wm(this)
     }
-
 
     /**
      * Iterate over all fields name
      *
      * @return {Iterator}
      */
-    *keys() {
-      for (let [name] of this)
+    * keys () {
+      for (let [name] of this) {
         yield name
+      }
     }
-
 
     /**
      * Overwrite all values given name
@@ -266,21 +261,22 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      * @param   {String=}   filename  Filename (optional)
      * @return  {Undefined}
      */
-    set(name, value, filename) {
+    set (name, value, filename) {
+      ensureArgs(arguments, 2)
+      ;[name, value, filename] = normalizeArgs.apply(null, arguments)
       wm(this)[name] = [[value, filename]]
     }
-
 
     /**
      * Iterate over all fields
      *
      * @return {Iterator}
      */
-    *values() {
-      for (let [name, value] of this)
+    * values () {
+      for (let [, value] of this) {
         yield value
+      }
     }
-
 
     /**
      * Return a native (perhaps degraded) FormData with only a `append` method
@@ -288,22 +284,22 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      *
      * @return {FormData}
      */
-    ['_asNative']() {
-      const fd = new _FormData
+    ['_asNative'] () {
+      const fd = new _FormData()
 
-      for (let [name, value] of this)
+      for (let [name, value] of this) {
         fd.append(name, value)
+      }
 
       return fd
     }
-
 
     /**
      * [_blob description]
      *
      * @return {Blob} [description]
      */
-    ['_blob']() {
+    ['_blob'] () {
       const boundary = '----formdata-polyfill-' + Math.random()
       const chunks = []
 
@@ -326,9 +322,10 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
 
       chunks.push(`--${boundary}--`)
 
-      return new Blob(chunks, {type: 'multipart/form-data; boundary=' + boundary})
+      return new Blob(chunks, {
+        type: 'multipart/form-data; boundary=' + boundary
+      })
     }
-
 
     /**
      * The class itself is iterable
@@ -336,21 +333,19 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
      *
      * @return  {Iterator}
      */
-    [Symbol.iterator]() {
+    [Symbol.iterator] () {
       return this.entries()
     }
-
 
     /**
      * Create the default string description.
      *
      * @return  {String} [object FormData]
      */
-    toString() {
+    toString () {
       return '[object FormData]'
     }
   }
-
 
   if (stringTag) {
     /**
@@ -362,25 +357,9 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
     FormDataPolyfill.prototype[stringTag] = 'FormData'
   }
 
-  const decorations = [
-    ['append', normalizeArgs],
-    ['delete', stringify],
-    ['get',    stringify],
-    ['getAll', stringify],
-    ['has',    stringify],
-    ['set',    normalizeArgs]
-  ]
-
-  decorations.forEach(arr => {
-    const orig = FormDataPolyfill.prototype[arr[0]]
-    FormDataPolyfill.prototype[arr[0]] = function() {
-      return orig.apply(this, arr[1].apply(this, arrayFrom(arguments)))
-    }
-  })
-
   // Patch xhr's send method to call _blob transparently
   if (_send) {
-    XMLHttpRequest.prototype.send = function(data) {
+    global.XMLHttpRequest.prototype.send = function (data) {
       // I would check if Content-Type isn't already set
       // But xhr lacks getRequestHeaders functionallity
       // https://github.com/jimmywarting/FormData/issues/44
@@ -398,7 +377,7 @@ if (typeof FormData === 'undefined' || !FormData.prototype.keys) {
   if (_fetch) {
     const _fetch = global.fetch
 
-    global.fetch = function(input, init) {
+    global.fetch = function (input, init) {
       if (init && init.body && init.body instanceof FormDataPolyfill) {
         init.body = init.body['_blob']()
       }

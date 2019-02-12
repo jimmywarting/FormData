@@ -6,6 +6,8 @@
 
 [![npm version][npm-image]][npm-url]
 
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 ```bash
 npm install formdata-polyfill
 ```
