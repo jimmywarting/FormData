@@ -12,6 +12,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
   // To be monkey patched
   const _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send
   const _fetch = global.Request && global.fetch
+  const _sendBeacon = global.navigator && global.navigator.sendBeacon
 
   // Unable to patch Request constructor correctly
   // const _Request = global.Request
@@ -388,6 +389,16 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
       }
 
       return _fetch.call(global, input, init)
+    }
+  }
+
+  // Patch navigator.sendBeacon to use native FormData
+  if (_sendBeacon) {
+    global.navigator.sendBeacon = function (url, data) {
+      if (data instanceof FormDataPolyfill) {
+        data = data['_asNative']()
+      }
+      return _sendBeacon.call(global.navigator, url, data)
     }
   }
 

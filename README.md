@@ -16,7 +16,8 @@ A `FormData` polyfill
 
 This polyfill conditionally replaces the native implementation rather then fixing the missing functions,
 since otherwise there is no way to get or delete existing values in the FormData object.
-Therefore this also patches `XMLHttpRequest.prototype.send` and `fetch` to send the FormData as a blob.
+Therefore this also patches `XMLHttpRequest.prototype.send` and `fetch` to send the `FormData` as a blob,
+and `navigator.sendBeacon` to send native `FormData`.
 
 I was unable to patch the Response/Request constructor
 so if you are constructing them with FormData you need to call `fd._blob()` manually.
