@@ -19,8 +19,6 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
   // https://github.com/babel/babel/issues/1966
 
   const stringTag = global.Symbol && Symbol.toStringTag
-  const map = new WeakMap()
-  const wm = o => map.get(o)
 
   // Add missing stringTags to blob and files
   if (stringTag) {
@@ -112,6 +110,8 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     }
   }
 
+  const dataSymbol = global.Symbol ? Symbol('data') : '__data'
+
   /**
    * @implements {Iterable}
    */
@@ -122,7 +122,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @param {HTMLElement=} form
      */
     constructor (form) {
-      map.set(this, Object.create(null))
+      this[dataSymbol] = Object.create(null)
 
       if (!form) return this
 
@@ -159,7 +159,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     append (name, value, filename) {
       ensureArgs(arguments, 2)
       ;[name, value, filename] = normalizeArgs.apply(null, arguments)
-      const map = wm(this)
+      const map = this[dataSymbol]
 
       if (!map[name]) map[name] = []
 
@@ -174,7 +174,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      */
     delete (name) {
       ensureArgs(arguments, 1)
-      delete wm(this)[String(name)]
+      delete this[dataSymbol][String(name)]
     }
 
     /**
@@ -183,7 +183,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @return {Iterator}
      */
     * entries () {
-      const map = wm(this)
+      const map = this[dataSymbol]
 
       for (let name in map) {
         for (let value of map[name]) {
@@ -215,7 +215,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      */
     get (name) {
       ensureArgs(arguments, 1)
-      const map = wm(this)
+      const map = this[dataSymbol]
       name = String(name)
       return map[name] ? normalizeValue(map[name][0]) : null
     }
@@ -228,7 +228,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      */
     getAll (name) {
       ensureArgs(arguments, 1)
-      return (wm(this)[String(name)] || []).map(normalizeValue)
+      return (this[dataSymbol][String(name)] || []).map(normalizeValue)
     }
 
     /**
@@ -239,7 +239,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      */
     has (name) {
       ensureArgs(arguments, 1)
-      return String(name) in wm(this)
+      return String(name) in this[dataSymbol]
     }
 
     /**
@@ -264,7 +264,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     set (name, value, filename) {
       ensureArgs(arguments, 2)
       ;[name, value, filename] = normalizeArgs.apply(null, arguments)
-      wm(this)[name] = [[value, filename]]
+      this[dataSymbol][name] = [[value, filename]]
     }
 
     /**

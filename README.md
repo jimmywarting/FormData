@@ -31,9 +31,6 @@ new Request(url, {
 Dependencies
 ---
 
-The internal data is kept private to prevent unintentional access to it,
-therefore `WeakMap` is used and you may also need a polyfill for that.
-
 If you need to support IE <= 9 then I recommend you to include eligrey's [blob.js]
 
 Updating from 2.x to 3.x
