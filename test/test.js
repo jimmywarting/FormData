@@ -44,6 +44,13 @@ window.File = new Proxy(NativeFile, {
         }).throw()
       })
 
+      // #78
+      it('testEmptyFileInput', () => {
+        const fd = create_form(`<input name=foo type=file>`)
+        assert.equal(fd.has('foo'), true)
+        assert.equal(fd.get('foo').type, 'application/octet-stream')
+      })
+
       it('testFormDataAppend1', () => {
         assert.equal(createFormData(['key', 'value1']).get('key'), 'value1')
       })

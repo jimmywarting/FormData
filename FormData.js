@@ -19,8 +19,6 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
   // https://github.com/babel/babel/issues/1966
 
   const stringTag = global.Symbol && Symbol.toStringTag
-  const map = new WeakMap()
-  const wm = o => map.get(o)
 
   // Add missing stringTags to blob and files
   if (stringTag) {
@@ -122,7 +120,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @param {HTMLElement=} form
      */
     constructor (form) {
-      map.set(this, Object.create(null))
+      this._data = Object.create(null)
 
       if (!form) return this
 
@@ -132,7 +130,11 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
         if (!elm.name || elm.disabled || elm.type === 'submit' || elm.type === 'button') return
 
         if (elm.type === 'file') {
-          each(elm.files || [], file => {
+          const files = elm.files && elm.files.length
+            ? elm.files
+            : [new File([], '', { type: 'application/octet-stream' })] // #78
+
+          each(files, file => {
             self.append(elm.name, file)
           })
         } else if (elm.type === 'select-multiple' || elm.type === 'select-one') {
@@ -151,15 +153,15 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Append a field
      *
-     * @param   {String}           name      field name
-     * @param   {String|Blob|File} value     string / blob / file
-     * @param   {String=}          filename  filename to use with blob
-     * @return  {Undefined}
+     * @param   {string}           name      field name
+     * @param   {string|Blob|File} value     string / blob / file
+     * @param   {string=}          filename  filename to use with blob
+     * @return  {undefined}
      */
     append (name, value, filename) {
       ensureArgs(arguments, 2)
       ;[name, value, filename] = normalizeArgs.apply(null, arguments)
-      const map = wm(this)
+      const map = this._data
 
       if (!map[name]) map[name] = []
 
@@ -169,12 +171,12 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Delete all fields values given name
      *
-     * @param   {String}  name  Field name
-     * @return  {Undefined}
+     * @param   {string}  name  Field name
+     * @return  {undefined}
      */
     delete (name) {
       ensureArgs(arguments, 1)
-      delete wm(this)[String(name)]
+      delete this._data[String(name)]
     }
 
     /**
@@ -183,7 +185,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @return {Iterator}
      */
     * entries () {
-      const map = wm(this)
+      const map = this._data
 
       for (let name in map) {
         for (let value of map[name]) {
@@ -197,7 +199,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      *
      * @param   {Function}  callback  Executed for each item with parameters (value, name, thisArg)
      * @param   {Object=}   thisArg   `this` context for callback function
-     * @return  {Undefined}
+     * @return  {undefined}
      */
     forEach (callback, thisArg) {
       ensureArgs(arguments, 1)
@@ -210,12 +212,12 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * Return first field value given name
      * or null if non existen
      *
-     * @param   {String}  name      Field name
-     * @return  {String|File|null}  value Fields value
+     * @param   {string}  name      Field name
+     * @return  {string|File|null}  value Fields value
      */
     get (name) {
       ensureArgs(arguments, 1)
-      const map = wm(this)
+      const map = this._data
       name = String(name)
       return map[name] ? normalizeValue(map[name][0]) : null
     }
@@ -223,23 +225,23 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Return all fields values given name
      *
-     * @param   {String}  name  Fields name
+     * @param   {string}  name  Fields name
      * @return  {Array}         [{String|File}]
      */
     getAll (name) {
       ensureArgs(arguments, 1)
-      return (wm(this)[String(name)] || []).map(normalizeValue)
+      return (this._data[String(name)] || []).map(normalizeValue)
     }
 
     /**
      * Check for field name existence
      *
-     * @param   {String}   name  Field name
+     * @param   {string}   name  Field name
      * @return  {boolean}
      */
     has (name) {
       ensureArgs(arguments, 1)
-      return String(name) in wm(this)
+      return String(name) in this._data
     }
 
     /**
@@ -256,15 +258,15 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Overwrite all values given name
      *
-     * @param   {String}    name      Filed name
-     * @param   {String}    value     Field value
-     * @param   {String=}   filename  Filename (optional)
-     * @return  {Undefined}
+     * @param   {string}    name      Filed name
+     * @param   {string}    value     Field value
+     * @param   {string=}   filename  Filename (optional)
+     * @return  {undefined}
      */
     set (name, value, filename) {
       ensureArgs(arguments, 2)
-      ;[name, value, filename] = normalizeArgs.apply(null, arguments)
-      wm(this)[name] = [[value, filename]]
+      const args = normalizeArgs.apply(null, arguments)
+      this._data[args[0]] = [[args[1], args[2]]]
     }
 
     /**
@@ -340,7 +342,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Create the default string description.
      *
-     * @return  {String} [object FormData]
+     * @return  {string} [object FormData]
      */
     toString () {
       return '[object FormData]'
@@ -351,14 +353,17 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
     /**
      * Create the default string description.
      * It is accessed internally by the Object.prototype.toString().
-     *
-     * @return {String} FormData
      */
     FormDataPolyfill.prototype[stringTag] = 'FormData'
   }
 
   // Patch xhr's send method to call _blob transparently
   if (_send) {
+    /**
+     * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=} data
+     * @return {undefined}
+     * @see http://www.w3.org/TR/XMLHttpRequest/#the-send()-method
+     */
     global.XMLHttpRequest.prototype.send = function (data) {
       // I would check if Content-Type isn't already set
       // But xhr lacks getRequestHeaders functionallity
@@ -382,7 +387,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
         init.body = init.body['_blob']()
       }
 
-      return _fetch(input, init)
+      return _fetch.call(global, input, init)
     }
   }
 
