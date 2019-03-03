@@ -388,7 +388,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
         init.body = init.body['_blob']()
       }
 
-      return _fetch.call(global, input, init)
+      return _fetch.call(this, input, init)
     }
   }
 
@@ -398,7 +398,7 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
       if (data instanceof FormDataPolyfill) {
         data = data['_asNative']()
       }
-      return _sendBeacon.call(global.navigator, url, data)
+      return _sendBeacon.call(this, url, data)
     }
   }
 
