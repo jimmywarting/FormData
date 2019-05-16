@@ -294,5 +294,18 @@ window.File = new Proxy(NativeFile, {
         assert.deepEqual([...fd], [['username', 'bob']])
       })
     })
+
+    describe('XHR', () => {
+      it('Shouldn\'t add Content-Type header if already present', async () => {
+        const formData = createFormData(['key', 'value1'])
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', 'https://httpbin.org/post', false)
+        xhr.setRequestHeader('Content-Type', 'text/plain')
+        xhr.send(formData);
+
+        const response = JSON.parse(xhr.response);
+        assert.equal(response.headers['Content-Type'], 'text/plain');
+      })
+    })
   })
 })
