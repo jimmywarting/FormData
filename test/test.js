@@ -1,4 +1,5 @@
 /* global it describe assert expect Blob FormData */
+
 const native = window.FormData
 window.FormData = undefined
 
@@ -199,13 +200,13 @@ window.File = new Proxy(NativeFile, {
     })
 
     describe('linebreaks', () => {
+      const form = document.createElement('form')
+      const textarea = document.createElement('textarea')
+      textarea.name = 'key'
+
       // Native FormData normalizes linefeeds in textareas to CRLF
       // In order to be consistent the polyfill should do the same
       it('Should convert LF to CRLF for textareas', () => {
-        // This can not be tested with 'create_form' as the function ignores \n
-        const form = document.createElement('form')
-        const textarea = document.createElement('textarea')
-        textarea.name = 'key'
         textarea.value = '\n'
         form.appendChild(textarea)
         const fd = new FormData(form)
@@ -214,9 +215,6 @@ window.File = new Proxy(NativeFile, {
       })
 
       it('Should convert CR to CRLF for textareas', () => {
-        const form = document.createElement('form')
-        const textarea = document.createElement('textarea')
-        textarea.name = 'key'
         textarea.value = '\r'
         form.appendChild(textarea)
         const fd = new FormData(form)
@@ -225,9 +223,6 @@ window.File = new Proxy(NativeFile, {
       })
 
       it('Should normalize mixed linefeeds to CRLF for textareas', () => {
-        const form = document.createElement('form')
-        const textarea = document.createElement('textarea')
-        textarea.name = 'key'
         textarea.value = 'a\n\ra\r\na\n\r\n\r\n\r\n\na\r\r'
         form.appendChild(textarea)
         const fd = new FormData(form)
@@ -296,7 +291,8 @@ window.File = new Proxy(NativeFile, {
     })
 
     describe.skip('XHR', () => {
-      it('Shouldn\'t add Content-Type header if already present', next => {
+      // #86
+      it('Shouldn not add Content-Type header if already present', next => {
         const formData = createFormData(['key', 'value1'])
         const xhr = new XMLHttpRequest()
         xhr.open('POST', 'https://httpbin.org/post')

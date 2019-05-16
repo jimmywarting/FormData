@@ -369,8 +369,8 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @see https://xhr.spec.whatwg.org/#dom-xmlhttprequest-setrequestheader
      */
     global.XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
+      setRequestHeader.call(this, name, value)
       if (name.toLowerCase() === 'content-type') this._hasContentType = true
-      return setRequestHeader.call(this, name, value)
     }
 
     /**
@@ -379,13 +379,9 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
      * @see https://xhr.spec.whatwg.org/#the-send()-method
      */
     global.XMLHttpRequest.prototype.send = function (data) {
-      // I would check if Content-Type isn't already set
-      // But xhr lacks getRequestHeaders functionallity
-      // https://github.com/jimmywarting/FormData/issues/44
+      // need to patch send b/c old IE don't send blob's type (#44)
       if (data instanceof FormDataPolyfill) {
         const blob = data['_blob']()
-        // Check if Content-Type is already set
-        // https://github.com/jimmywarting/FormData/issues/86
         if (!this._hasContentType) this.setRequestHeader('Content-Type', blob.type)
         _send.call(this, blob)
       } else {
