@@ -360,10 +360,23 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
 
   // Patch xhr's send method to call _blob transparently
   if (_send) {
+    const setRequestHeader = global.XMLHttpRequest.prototype.setRequestHeader
+
+    /**
+     * @param {string} name
+     * @param {string} value
+     * @returns {undefined}
+     * @see https://xhr.spec.whatwg.org/#dom-xmlhttprequest-setrequestheader
+     */
+    global.XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
+      if (name.toLowerCase() === 'content-type') this._hasContentType = true
+      return setRequestHeader.call(this, name, value)
+    }
+
     /**
      * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=} data
      * @return {undefined}
-     * @see http://www.w3.org/TR/XMLHttpRequest/#the-send()-method
+     * @see https://xhr.spec.whatwg.org/#the-send()-method
      */
     global.XMLHttpRequest.prototype.send = function (data) {
       // I would check if Content-Type isn't already set
@@ -371,7 +384,9 @@ if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.
       // https://github.com/jimmywarting/FormData/issues/44
       if (data instanceof FormDataPolyfill) {
         const blob = data['_blob']()
-        this.setRequestHeader('Content-Type', blob.type)
+        // Check if Content-Type is already set
+        // https://github.com/jimmywarting/FormData/issues/86
+        if (!this._hasContentType) this.setRequestHeader('Content-Type', blob.type)
         _send.call(this, blob)
       } else {
         _send.call(this, data)
