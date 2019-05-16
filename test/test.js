@@ -295,16 +295,18 @@ window.File = new Proxy(NativeFile, {
       })
     })
 
-    describe('XHR', () => {
-      it('Shouldn\'t add Content-Type header if already present', async () => {
+    describe.skip('XHR', () => {
+      it('Shouldn\'t add Content-Type header if already present', next => {
         const formData = createFormData(['key', 'value1'])
         const xhr = new XMLHttpRequest()
-        xhr.open('POST', 'https://httpbin.org/post', false)
+        xhr.open('POST', 'https://httpbin.org/post')
         xhr.setRequestHeader('Content-Type', 'text/plain')
-        xhr.send(formData);
-
-        const response = JSON.parse(xhr.response);
-        assert.equal(response.headers['Content-Type'], 'text/plain');
+        xhr.responseType = 'json'
+        xhr.onload = () => {
+          assert.equal(xhr.response.headers['Content-Type'], 'text/plain')
+          next()
+        }
+        xhr.send(formData)
       })
     })
   })
