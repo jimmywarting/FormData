@@ -188,8 +188,8 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     * entries () {
       const map = this._data
 
-      for (let name in map) {
-        for (let value of map[name]) {
+      for (const name in map) {
+        for (const value of map[name]) {
           yield [name, normalizeValue(value)]
         }
       }
@@ -204,7 +204,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     forEach (callback, thisArg) {
       ensureArgs(arguments, 1)
-      for (let [name, value] of this) {
+      for (const [name, value] of this) {
         callback.call(thisArg, value, name, this)
       }
     }
@@ -251,7 +251,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @return {Iterator}
      */
     * keys () {
-      for (let [name] of this) {
+      for (const [name] of this) {
         yield name
       }
     }
@@ -276,7 +276,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @return {Iterator}
      */
     * values () {
-      for (let [, value] of this) {
+      for (const [, value] of this) {
         yield value
       }
     }
@@ -290,7 +290,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     ['_asNative'] () {
       const fd = new _FormData()
 
-      for (let [name, value] of this) {
+      for (const [name, value] of this) {
         fd.append(name, value)
       }
 
@@ -306,7 +306,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       const boundary = '----formdata-polyfill-' + Math.random()
       const chunks = []
 
-      for (let [name, value] of this) {
+      for (const [name, value] of this) {
         chunks.push(`--${boundary}\r\n`)
 
         if (value instanceof Blob) {
