@@ -1,7 +1,7 @@
 /* global FormData self Blob File */
 /* eslint-disable no-inner-declarations */
 
-if (typeof Blob === 'function' && (typeof FormData === 'undefined' || !FormData.prototype.keys)) {
+if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData.prototype.keys)) {
   const global = typeof window === 'object'
     ? window
     : typeof self === 'object' ? self : this
