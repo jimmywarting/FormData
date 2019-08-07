@@ -67,7 +67,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     }
   }
 
-  function normalizeValue ([value, filename]) {
+  function normalizeValue ([name, value, filename]) {
     if (value instanceof Blob) {
       // Should always returns a new File instance
       // console.assert(fd.get(x) !== fd.get(x))
@@ -77,7 +77,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       })
     }
 
-    return value
+    return [name, value]
   }
 
   function ensureArgs (args, expected) {
@@ -121,7 +121,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @param {HTMLElement=} form
      */
     constructor (form) {
-      this._data = Object.create(null)
+      this._data = []
 
       if (!form) return this
 
@@ -161,12 +161,8 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     append (name, value, filename) {
       ensureArgs(arguments, 2)
-      ;[name, value, filename] = normalizeArgs.apply(null, arguments)
-      const map = this._data
-
-      if (!map[name]) map[name] = []
-
-      map[name].push([value, filename])
+      var [a, s, d] = normalizeArgs.apply(null, arguments)
+      this._data.push([a, s, d])
     }
 
     /**
@@ -177,7 +173,16 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     delete (name) {
       ensureArgs(arguments, 1)
-      delete this._data[String(name)]
+      const res = []
+      name = String(name)
+
+      each(this._data, entry => {
+        if (entry[0] !== name) {
+          res.push(entry)
+        }
+      })
+
+      this._data = res
     }
 
     /**
@@ -186,12 +191,8 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @return {Iterator}
      */
     * entries () {
-      const map = this._data
-
-      for (const name in map) {
-        for (const value of map[name]) {
-          yield [name, normalizeValue(value)]
-        }
+      for (var i = 0; i < this._data.length; i++) {
+        yield normalizeValue(this._data[i])
       }
     }
 
@@ -218,9 +219,14 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     get (name) {
       ensureArgs(arguments, 1)
-      const map = this._data
+      const entries = this._data
       name = String(name)
-      return map[name] ? normalizeValue(map[name][0]) : null
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i][0] === name) {
+          return normalizeValue(this._data[i])[1]
+        }
+      }
+      return null
     }
 
     /**
@@ -231,7 +237,15 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     getAll (name) {
       ensureArgs(arguments, 1)
-      return (this._data[String(name)] || []).map(normalizeValue)
+      const result = []
+      name = String(name)
+      for (let i = 0; i < this._data.length; i++) {
+        if (this._data[i][0] === name) {
+          result.push(normalizeValue(this._data[i])[1])
+        }
+      }
+
+      return result
     }
 
     /**
@@ -242,7 +256,13 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     has (name) {
       ensureArgs(arguments, 1)
-      return String(name) in this._data
+      name = String(name)
+      for (let i = 0; i < this._data.length; i++) {
+        if (this._data[i][0] === name) {
+          return true
+        }
+      }
+      return false
     }
 
     /**
@@ -266,8 +286,27 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     set (name, value, filename) {
       ensureArgs(arguments, 2)
-      const args = normalizeArgs.apply(null, arguments)
-      this._data[args[0]] = [[args[1], args[2]]]
+      name = String(name)
+      const result = []
+      let replaced = false
+
+      for (let i = 0; i < this._data.length; i++) {
+        const match = this._data[i][0] === name
+        if (match) {
+          if (!replaced) {
+            result[i] = normalizeArgs.apply(null, arguments)
+            replaced = true
+          }
+        } else {
+          result.push(this._data[i])
+        }
+      }
+
+      if (!replaced) {
+        result.push(normalizeArgs.apply(null, arguments))
+      }
+
+      this._data = result
     }
 
     /**

@@ -19,15 +19,15 @@ window.File = new Proxy(NativeFile, {
 })
 
 ;[native, Polyfill].forEach(FormData => {
-  function createFormData(...args) {
+  function createFormData (...args) {
     const fd = new FormData()
-    for (let arg of args) {
+    for (const arg of args) {
       fd.append(...arg)
     }
     return fd
   }
 
-  function create_form(str) {
+  function createForm (str) {
     var form = document.createElement('form')
     form.innerHTML = str
     return new FormData(form)
@@ -47,7 +47,7 @@ window.File = new Proxy(NativeFile, {
 
       // #78
       it('testEmptyFileInput', () => {
-        const fd = create_form(`<input name=foo type=file>`)
+        const fd = createForm(`<input name=foo type=file>`)
         assert.equal(fd.has('foo'), true)
         assert.equal(fd.get('foo').type, 'application/octet-stream')
       })
@@ -141,6 +141,47 @@ window.File = new Proxy(NativeFile, {
         assert.equal(fd.has('n2'), true)
         fd.append('n3', new Blob(['content']))
         assert.equal(fd.has('n3'), true)
+      })
+    })
+
+    describe('entries', () => {
+      it('should return the keys/values/entres as they are appended', () => {
+        const fd = createFormData(
+          ['keyA', 'val1'],
+          ['keyA', 'val2'],
+          ['keyB', 'val3'],
+          ['keyA', 'val4']
+        )
+
+        assert.deepEqual([...fd.keys()], ['keyA', 'keyA', 'keyB', 'keyA'])
+        assert.deepEqual([...fd.values()], ['val1', 'val2', 'val3', 'val4'])
+        assert.deepEqual([...fd], [
+          ['keyA', 'val1'],
+          ['keyA', 'val2'],
+          ['keyB', 'val3'],
+          ['keyA', 'val4']
+        ])
+      })
+    })
+
+    describe('set', () => {
+      it('Overwrite first matching key', () => {
+        const fd = createFormData(
+          ['keyA', 'val1'],
+          ['keyA', 'val2'],
+          ['keyB', 'val3'],
+          ['keyA', 'val4']
+        )
+        fd.set('keyA', 'val3')
+        assert.deepEqual([...fd], [['keyA', 'val3'], ['keyB', 'val3']])
+      })
+
+      it('appends value when no matching', () => {
+        const fd = createFormData(
+          ['keyB', 'val3']
+        )
+        fd.set('keyA', 'val3')
+        assert.deepEqual([...fd], [['keyB', 'val3'], ['keyA', 'val3']])
       })
     })
 
@@ -245,7 +286,7 @@ window.File = new Proxy(NativeFile, {
 
     describe('disabled', () => {
       it('Shold not include disabled fields', () => {
-        const fd = create_form(
+        const fd = createForm(
           `<input disabled name=foo value=bar>`
         )
         assert.deepEqual([...fd], [])
@@ -253,7 +294,7 @@ window.File = new Proxy(NativeFile, {
 
       // #56
       it('Select elements where the option is both selected and disabled should not be included', () => {
-        const fd = create_form(`
+        const fd = createForm(`
           <select multiple name="example">
             <option selected disabled value="foo">Please choose one</option>
           </select>
@@ -266,7 +307,7 @@ window.File = new Proxy(NativeFile, {
     describe('constructor', () => {
       // #45
       it('Shold return selected items', () => {
-        const fd = create_form(`
+        const fd = createForm(`
           <select multiple name="example">
             <option selected value="volvo">Volvo</option>
             <option selected value="saab">Saab</option>
@@ -280,7 +321,7 @@ window.File = new Proxy(NativeFile, {
 
       // #62
       it('Should not add buttons to FormData', () => {
-        const fd = create_form(`
+        const fd = createForm(`
           <input type="text" name="username" value="bob">
           <input type="submit" value="rename" name="action">
           <input type="submit" value="find_n_delete" name="action">
