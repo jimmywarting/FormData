@@ -68,8 +68,7 @@ Native Browser compatibility (as of 2020-01-13)
 ---
 Based on this you can decide for yourself if you need this polyfill. 
 
-The status of the native FormData (2018-11-15) is:
-[![skarmavbild 2018-11-15 kl 20 16 36](https://user-images.githubusercontent.com/1148376/72220782-80a45600-3554-11ea-8107-06025f3a3f8a.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
+[![skarmavbild 2020-01-13 kl 20 16 36](https://user-images.githubusercontent.com/1148376/72220782-80a45600-3554-11ea-8107-06025f3a3f8a.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
 
 
 
