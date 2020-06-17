@@ -285,9 +285,17 @@ window.File = new Proxy(NativeFile, {
     })
 
     describe('disabled', () => {
-      it('Shold not include disabled fields', () => {
+      it('Shold not include disabled inputs', () => {
         const fd = createForm(
           `<input disabled name=foo value=bar>`
+          )
+          assert.deepEqual([...fd], [])
+        })
+
+      // #110
+      it('Shold not include disabled fieldset inputs', () => {
+        const fd = createForm(
+          `<fieldset disabled><input name=foo value=bar></fieldset>`
         )
         assert.deepEqual([...fd], [])
       })
