@@ -2,9 +2,11 @@
 /* eslint-disable no-inner-declarations */
 
 if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData.prototype.keys)) {
-  const global = typeof window === 'object'
-    ? window
-    : typeof self === 'object' ? self : this
+  const global = typeof globalThis === 'object'
+    ? globalThis
+    : typeof window === 'object'
+      ? window
+      : typeof self === 'object' ? self : this
 
   // keep a reference to native implementation
   const _FormData = global.FormData
@@ -13,9 +15,10 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   const _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send
   const _fetch = global.Request && global.fetch
   const _sendBeacon = global.navigator && global.navigator.sendBeacon
+  // Might be a worker thread...
+  const _match = global.Element && global.Element.prototype
 
-  // Unable to patch Request constructor correctly
-  // const _Request = global.Request
+  // Unable to patch Request/Response constructor correctly #109
   // only way is to use ES6 class extend
   // https://github.com/babel/babel/issues/1966
 
@@ -123,12 +126,16 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     constructor (form) {
       this._data = []
 
-      if (!form) return this
-
       const self = this
 
-      each(form.elements, elm => {
-        if (!elm.name || elm.disabled || elm.type === 'submit' || elm.type === 'button') return
+      form && each(form.elements, elm => {
+        if (
+          !elm.name ||
+          elm.disabled ||
+          elm.type === 'submit' ||
+          elm.type === 'button' ||
+          elm.matches('form fieldset[disabled] *')
+        ) return
 
         if (elm.type === 'file') {
           const files = elm.files && elm.files.length
@@ -161,8 +168,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     append (name, value, filename) {
       ensureArgs(arguments, 2)
-      var [a, s, d] = normalizeArgs.apply(null, arguments)
-      this._data.push([a, s, d])
+      this._data.push(normalizeArgs(name, value, filename))
     }
 
     /**
@@ -173,16 +179,14 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     delete (name) {
       ensureArgs(arguments, 1)
-      const res = []
+      const result = []
       name = String(name)
 
       each(this._data, entry => {
-        if (entry[0] !== name) {
-          res.push(entry)
-        }
+        entry[0] !== name && result.push(entry)
       })
 
-      this._data = res
+      this._data = result
     }
 
     /**
@@ -223,7 +227,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       name = String(name)
       for (let i = 0; i < entries.length; i++) {
         if (entries[i][0] === name) {
-          return normalizeValue(this._data[i])[1]
+          return normalizeValue(entries[i])[1]
         }
       }
       return null
@@ -239,11 +243,9 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       ensureArgs(arguments, 1)
       const result = []
       name = String(name)
-      for (let i = 0; i < this._data.length; i++) {
-        if (this._data[i][0] === name) {
-          result.push(normalizeValue(this._data[i])[1])
-        }
-      }
+      each(this._data, data => {
+        data[0] === name && result.push(normalizeValue(data)[1])
+      })
 
       return result
     }
@@ -288,23 +290,19 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       ensureArgs(arguments, 2)
       name = String(name)
       const result = []
-      let replaced = false
+      const args = normalizeArgs(name, value, filename)
+      let replace = true
 
-      for (let i = 0; i < this._data.length; i++) {
-        const match = this._data[i][0] === name
-        if (match) {
-          if (!replaced) {
-            result[i] = normalizeArgs.apply(null, arguments)
-            replaced = true
-          }
-        } else {
-          result.push(this._data[i])
-        }
-      }
+      // - replace the first occurrence with same name
+      // - discards the remaning with same name
+      // - while keeping the same order items where added
+      each(this._data, data => {
+        data[0] === name
+          ? replace && (replace = !result.push(args))
+          : result.push(data)
+      })
 
-      if (!replaced) {
-        result.push(normalizeArgs.apply(null, arguments))
-      }
+      replace && result.push(args)
 
       this._data = result
     }
@@ -350,7 +348,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
 
         if (value instanceof Blob) {
           chunks.push(
-            `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n`,
+            `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
             `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
             value,
             '\r\n'
@@ -389,6 +387,21 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     }
   }
 
+  if (_match && !_match.matches) {
+    _match.matches =
+      _match.matchesSelector ||
+      _match.mozMatchesSelector ||
+      _match.msMatchesSelector ||
+      _match.oMatchesSelector ||
+      _match.webkitMatchesSelector ||
+      function (s) {
+        var matches = (this.document || this.ownerDocument).querySelectorAll(s)
+        var i = matches.length
+        while (--i >= 0 && matches.item(i) !== this) {}
+        return i > -1
+      }
+  }
+
   if (stringTag) {
     /**
      * Create the default string description.
@@ -401,22 +414,11 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   if (_send) {
     const setRequestHeader = global.XMLHttpRequest.prototype.setRequestHeader
 
-    /**
-     * @param {string} name
-     * @param {string} value
-     * @returns {undefined}
-     * @see https://xhr.spec.whatwg.org/#dom-xmlhttprequest-setrequestheader
-     */
     global.XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
       setRequestHeader.call(this, name, value)
       if (name.toLowerCase() === 'content-type') this._hasContentType = true
     }
 
-    /**
-     * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=} data
-     * @return {undefined}
-     * @see https://xhr.spec.whatwg.org/#the-send()-method
-     */
     global.XMLHttpRequest.prototype.send = function (data) {
       // need to patch send b/c old IE don't send blob's type (#44)
       if (data instanceof FormDataPolyfill) {
@@ -431,8 +433,6 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
 
   // Patch fetch's function to call _blob transparently
   if (_fetch) {
-    const _fetch = global.fetch
-
     global.fetch = function (input, init) {
       if (init && init.body && init.body instanceof FormDataPolyfill) {
         init.body = init.body['_blob']()
