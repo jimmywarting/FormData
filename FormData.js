@@ -1,15 +1,30 @@
 /* global FormData self Blob File */
 /* eslint-disable no-inner-declarations */
 
-if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData.prototype.keys)) {
-  const global = typeof globalThis === 'object'
-    ? globalThis
-    : typeof window === 'object'
-      ? window
-      : typeof self === 'object' ? self : this
+const global = typeof globalThis === 'object'
+  ? globalThis
+  : typeof window === 'object'
+    ? window
+    : typeof self === 'object' ? self : this
 
-  // keep a reference to native implementation
-  const _FormData = global.FormData
+// keep a reference to native implementation
+const _FormData = global.FormData
+const _Request = global.Request
+const _Response = global.Response
+
+const isPolyfillPossible = typeof Blob !== 'undefined'
+if (isPolyfillPossible) {
+  // cannot polyfill without Blob
+  loadFormDataPolyfill()
+  loadRequestResponsePolyfill()
+}
+
+function loadFormDataPolyfill (action) {
+  const isFormDataPolyfillNeeded =
+    typeof FormData === 'undefined' || !FormData.prototype.keys
+  if (!isFormDataPolyfillNeeded) {
+    return
+  }
 
   // To be monkey patched
   const _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send
@@ -340,31 +355,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @return {Blob} [description]
      */
     ['_blob'] () {
-      const boundary = '----formdata-polyfill-' + Math.random()
-      const chunks = []
-
-      for (const [name, value] of this) {
-        chunks.push(`--${boundary}\r\n`)
-
-        if (value instanceof Blob) {
-          chunks.push(
-            `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
-            `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
-            value,
-            '\r\n'
-          )
-        } else {
-          chunks.push(
-            `Content-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`
-          )
-        }
-      }
-
-      chunks.push(`--${boundary}--`)
-
-      return new Blob(chunks, {
-        type: 'multipart/form-data; boundary=' + boundary
-      })
+      return formDataToBlobPolyfill(this)
     }
 
     /**
@@ -453,4 +444,128 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   }
 
   global['FormData'] = FormDataPolyfill
+}
+
+function loadRequestResponsePolyfill () {
+  if (!_Request) {
+    return // nothing to polyfill
+  }
+  let isPlatformCheckDone = false
+  let isNativeFormDataOperationsSupported = null
+
+  function processBody (body) {
+    if (!body) {
+      return body
+    }
+    const isFormDataPolyfillBody =
+      body._blob && typeof body._blob === 'function'
+    if (isFormDataPolyfillBody) {
+      return body._blob()
+    }
+    const isPartialPolyfillNeeded =
+      _FormData &&
+      body instanceof _FormData &&
+      isPlatformCheckDone &&
+      !isNativeFormDataOperationsSupported
+    if (isPartialPolyfillNeeded) {
+      return formDataToBlobPolyfill(body)
+    }
+    return body
+  }
+
+  global.Request = (function () {
+    function Request (input, init) {
+      if (init) {
+        init.body = processBody(init.body)
+      }
+
+      if (arguments.length === 0) return new _Request()
+      if (arguments.length === 1) return new _Request(input)
+      if (arguments.length > 1) return new _Request(input, init)
+    }
+
+    // delegate the instanceof check to check if it compares to native
+    // Request instead.
+    Object.defineProperty(Request, Symbol.hasInstance, {
+      value: function (instance) {
+        return instance instanceof _Request
+      }
+    })
+
+    return Request
+  })()
+
+  global.Response = (function () {
+    function Response (body, init) {
+      const processedBody = processBody(body)
+
+      if (arguments.length === 0) return new _Response()
+      if (arguments.length === 1) return new _Response(processedBody)
+      if (arguments.length > 1) return new _Response(processedBody, init)
+    }
+
+    // delegate the instanceof check to check if it compares to native
+    // Request instead.
+    Object.defineProperty(Response, Symbol.hasInstance, {
+      value: function (instance) {
+        return instance instanceof _Response
+      }
+    })
+
+    return Response
+  })()
+
+  global.Request.polyfillPromise = (async function () {
+    // we load each part of the Request and Response polyfills as soon as
+    // possible to minimise chance of race condition but if the first thing
+    // you do when the page loads is call the Request or Response
+    // constructor, you should probably `await Request.polyfillPromise`.
+    try {
+      // The native FormData in Safari (WebKit), where it exists, doesn't
+      // support doing Request.arrayBuffer() (or .blob()). In this case, we
+      // need a partial polyfill: using the native FormData but polyfill the
+      // uses of it.
+      await new _Request('z', {
+        method: 'POST',
+        body: new _FormData()
+      }).arrayBuffer()
+      isNativeFormDataOperationsSupported = true
+    } catch (err) {
+      // err will either be
+      //  - "The operation is not supported" from the .arrayBuffer() call
+      //  - "_FormData is not a constructor"
+      isNativeFormDataOperationsSupported = false
+    } finally {
+      isPlatformCheckDone = true
+    }
+  })()
+}
+
+function formDataToBlobPolyfill (fd) {
+  // need to extract this so we can use it even when we don't load FormDataPolyfill
+  const boundary = '----formdata-polyfill-' + Math.random()
+  const chunks = []
+
+  for (const [name, value] of fd) {
+    chunks.push(`--${boundary}\r\n`)
+
+    if (value instanceof Blob) {
+      chunks.push(
+        `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
+        `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
+        value,
+        '\r\n'
+      )
+    } else {
+      chunks.push(
+        `Content-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`
+      )
+    }
+  }
+
+  chunks.push(`--${boundary}--`)
+
+  return new Blob(chunks, {
+    type: 'multipart/form-data; boundary=' + boundary
+  })
 }
