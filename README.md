@@ -29,6 +29,20 @@ new Request(url, {
 })
 ```
 
+Part of this polyfill is loaded asynchronously. If you plan on making `fetch`
+calls right after the page has loaded, there is a promise that's exposed that
+you should await:
+
+```js
+await (Request.polyfillPromise || Promise.resolve())
+// OR
+(Request.polyfillPromise || Promise.resolve()).then(/* your code here /*)
+```
+
+Make sure the polyfill is loaded before you await the promise. The promise will
+only be missing if the polyfill cannot be loaded, which only happens on very
+old browsers.
+
 Dependencies
 ---
 
