@@ -1,7 +1,8 @@
 {
   "name": "formdata-polyfill",
-  "version": "3.0.20",
-  "description": "HTML5 `FormData` polyfill for Browsers.",
+  "version": "4.0.0",
+  "description": "HTML5 `FormData` for Browsers and Node.",
+  "type": "module",
   "main": "formdata.min.js",
   "scripts": {
     "build": "node build",
@@ -13,12 +14,16 @@
     "url": "git+https://jimmywarting@github.com/jimmywarting/FormData.git"
   },
   "files": [
+    "esm.min.js",
     "FormData.js",
+    "formdata-to-blob.js",
     "formdata.min.js",
     "README.md"
   ],
   "keywords": [
     "formdata",
+    "fetch",
+    "node-fetch",
     "html5",
     "browser",
     "polyfill"
@@ -36,5 +41,8 @@
     "karma-chrome-launcher": "^3.1.0",
     "karma-mocha": "^2.0.1",
     "mocha": "^8.0.1"
+  },
+  "dependencies": {
+    "fetch-blob": "*"
   }
 }

@@ -1,26 +1,88 @@
-# FormData
-
-[![Greenkeeper badge](https://badges.greenkeeper.io/jimmywarting/FormData.svg)](https://greenkeeper.io/)
-
-[![Build Status](https://travis-ci.org/jimmywarting/FormData.svg?branch=master)](https://travis-ci.org/jimmywarting/FormData)
-
-[![npm version][npm-image]][npm-url]
-
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+### A `FormData` polyfill for the browser ...and a module for NodeJS (`New!`)
 
 ```bash
 npm install formdata-polyfill
 ```
 
-A `FormData` polyfill
+The browser polyfill will likely have done its part already, and i hope you stop supporting old browsers c",)<br>
+But NodeJS still laks a proper FormData<br>The good old form-data package is a very old and isn't spec compatible and dose some abnormal stuff to construct and read FormData instances that other http libraries are not happy about when it comes to follow the spec.
 
-This polyfill conditionally replaces the native implementation rather then fixing the missing functions,
+### The NodeJS / ESM version
+- The modular (~1900 B minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
+- It's as pure/spec compatible as it possible gets.
+- It's compatible with [node-fetch](https://github.com/node-fetch/node-fetch).
+- It have higher platform dependencies as it uses classes, symbols & private fields
+- Only dependency it has is fetch-blob
+
+```js
+// Node example
+import fetch from 'node-fetch'
+import Blob from 'fetch-blob'
+import blobFrom from 'fetch-blob/from.js'
+import { FormData, File } from 'formdata-polyfill/esm-min.js'
+
+const file = new File([ blobFrom('./README.md') ], 'README.md')
+const fd = new FormData()
+
+fd.append('file-upload', new Blob(['abc']), 'hello-world.txt')
+fd.append('file-upload', file)
+
+// it's also possible to append file/blob look-a-like items
+// if you have streams coming from other destinations
+fd.append('file-upload', {
+  size: 123,
+  type: '',
+  name: 'cat.mp4',
+  stream() { return stream },
+  [symbol.toStringTag]: 'File'
+})
+
+fetch('https://httpbin.org/post', { method: 'POST', body: fd })
+```
+
+----
+
+It also comes with way to convert FormData into Blobs - it's not something that every developer should have to deal with.
+It's mainly for [node-fetch](https://github.com/node-fetch/node-fetch) and other http library to ease the process of serializing a FormData into a blob and just wish to deal with Blobs instead
+<details>
+    <summary>See code example</summary>
+
+```js
+import { formDataToBlob } from 'formdata-polyfill/esm.min.js'
+
+const blob = formDataToBlob(formData)
+fetch('https://httpbin.org/post', { method: 'POST', body: blob })
+
+// node built in http and other similar http library have to do:
+const stream = stream.Readable.from(blob.stream())
+const req = http.request('http://httpbin.org/post', {
+  method: 'post',
+  headers: {
+    'Content-Length': blob.size,
+    'Content-Type': blob.type
+  }
+})
+stream.pipe(req)
+```
+</details>
+PS: blob & file that are appended to the FormData will not be read until any of the serialized blob read-methods gets called
+...so uploading very large files is no biggie
+
+### Browser polyfill
+
+usage:
+
+```js
+import 'formdata-polyfill' // that's it
+```
+
+The browser polyfill conditionally replaces the native implementation rather then fixing the missing functions,
 since otherwise there is no way to get or delete existing values in the FormData object.
 Therefore this also patches `XMLHttpRequest.prototype.send` and `fetch` to send the `FormData` as a blob,
 and `navigator.sendBeacon` to send native `FormData`.
 
 I was unable to patch the Response/Request constructor
-so if you are constructing them with FormData you need to call `fd._blob()` manually.
+so if you are constructing them with FormData then you need to call `fd._blob()` manually.
 
 ```js
 new Request(url, {
@@ -33,6 +95,7 @@ Dependencies
 ---
 
 If you need to support IE <= 9 then I recommend you to include eligrey's [blob.js]
+(which i hope you don't - since IE is now dead)
 
 <details>
     <summary>Updating from 2.x to 3.x</summary>
@@ -64,15 +127,15 @@ xhr.send(fd)
 
 
 
-Native Browser compatibility (as of 2020-01-13)
+Native Browser compatibility (as of 2021-05-08)
 ---
-Based on this you can decide for yourself if you need this polyfill. 
+Based on this you can decide for yourself if you need this polyfill.
 
-[![skarmavbild 2020-01-13 kl 20 16 36](https://user-images.githubusercontent.com/1148376/72220782-80a45600-3554-11ea-8107-06025f3a3f8a.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
+[![screenshot](https://user-images.githubusercontent.com/1148376/117550329-0993aa80-b040-11eb-976c-14e31f1a3ba4.png)](https://developer.mozilla.org/en-US/docs/Web/API/FormData#Browser_compatibility)
 
 
 
-This polyfill normalizes support for the FormData API:
+This normalizes support for the FormData API:
 
  - `append` with filename
  - `delete()`, `get()`, `getAll()`, `has()`, `set()`
