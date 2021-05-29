@@ -1,6 +1,6 @@
 {
   "name": "formdata-polyfill",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "HTML5 `FormData` for Browsers and Node.",
   "type": "module",
   "main": "formdata.min.js",
@@ -35,6 +35,6 @@
   },
   "homepage": "https://github.com/jimmywarting/FormData#readme",
   "dependencies": {
-    "fetch-blob": "^3.0.1"
+    "fetch-blob": "^3.0.0"
   }
 }
