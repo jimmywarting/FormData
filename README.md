@@ -8,7 +8,7 @@ The browser polyfill will likely have done its part already, and i hope you stop
 But NodeJS still laks a proper FormData<br>The good old form-data package is a very old and isn't spec compatible and dose some abnormal stuff to construct and read FormData instances that other http libraries are not happy about when it comes to follow the spec.
 
 ### The NodeJS / ESM version
-- The modular (~1900 B minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
+- The modular (~1500 B minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
 - It's as pure/spec compatible as it possible gets.
 - It's compatible with [node-fetch](https://github.com/node-fetch/node-fetch).
 - It have higher platform dependencies as it uses classes, symbols & private fields
@@ -17,14 +17,14 @@ But NodeJS still laks a proper FormData<br>The good old form-data package is a v
 ```js
 // Node example
 import fetch from 'node-fetch'
-import Blob from 'fetch-blob'
-import blobFrom from 'fetch-blob/from.js'
-import { FormData, File } from 'formdata-polyfill/esm-min.js'
+import File from 'fetch-blob/file.js'
+import { fileFromSync } from 'fetch-blob/from.js'
+import { FormData } from 'formdata-polyfill/esm-min.js'
 
-const file = new File([ blobFrom('./README.md') ], 'README.md')
+const file = fileFromSync('./README.md')
 const fd = new FormData()
 
-fd.append('file-upload', new Blob(['abc']), 'hello-world.txt')
+fd.append('file-upload', new File(['abc'], 'hello-world.txt'))
 fd.append('file-upload', file)
 
 // it's also possible to append file/blob look-a-like items

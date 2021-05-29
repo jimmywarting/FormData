@@ -70,19 +70,6 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     }
   }
 
-  function normalizeValue ([name, value, filename]) {
-    if (value instanceof Blob) {
-      // Should always returns a new File instance
-      // console.assert(fd.get(x) !== fd.get(x))
-      value = new File([value], filename, {
-        type: value.type,
-        lastModified: value.lastModified
-      })
-    }
-
-    return [name, value]
-  }
-
   function ensureArgs (args, expected) {
     if (args.length < expected) {
       throw new TypeError(`${expected} argument required, but only ${args.length} present.`)
@@ -90,19 +77,22 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   }
 
   function normalizeArgs (name, value, filename) {
-    return value instanceof Blob
-      // normalize name and filename if adding an attachment
-      ? [String(name), value, filename !== undefined
-        ? filename + '' // Cast filename to string if 3th arg isn't undefined
-        : typeof value.name === 'string' // if name prop exist
-          ? value.name // Use File.name
-          : 'blob'] // otherwise fallback to Blob
+    if (value instanceof Blob) {
+      filename = filename !== undefined
+      ? String(filename + '')
+      : typeof value.name === 'string'
+      ? value.name
+      : 'blob'
 
-      // If no attachment, just cast the args to strings
-      : [String(name), String(value)]
+      if (value.name !== filename || Object.prototype.toString.call(value) === '[object Blob]') {
+        value = new File([value], filename)
+      }
+      return [String(name), value]
+    }
+    return [String(name), String(value)]
   }
 
-  // normalize linefeeds for textareas
+  // normalize line feeds for textarea
   // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
   function normalizeLinefeeds (value) {
     return value.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
@@ -196,7 +186,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      */
     * entries () {
       for (var i = 0; i < this._data.length; i++) {
-        yield normalizeValue(this._data[i])
+        yield this._data[i]
       }
     }
 
@@ -216,7 +206,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
 
     /**
      * Return first field value given name
-     * or null if non existen
+     * or null if non existent
      *
      * @param   {string}  name      Field name
      * @return  {string|File|null}  value Fields value
@@ -227,7 +217,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       name = String(name)
       for (let i = 0; i < entries.length; i++) {
         if (entries[i][0] === name) {
-          return normalizeValue(entries[i])[1]
+          return entries[i][1]
         }
       }
       return null
@@ -244,7 +234,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       const result = []
       name = String(name)
       each(this._data, data => {
-        data[0] === name && result.push(normalizeValue(data)[1])
+        data[0] === name && result.push(data[1])
       })
 
       return result
@@ -294,7 +284,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
       let replace = true
 
       // - replace the first occurrence with same name
-      // - discards the remaning with same name
+      // - discards the remaining with same name
       // - while keeping the same order items where added
       each(this._data, data => {
         data[0] === name

@@ -6,8 +6,6 @@ console.assert(
   'It can create a blob from FormData'
 )
 
-console.log(formDataToBlob(createFormData(['key', 'value1'])).type)
-
 // All of the below code can be executed in the browser as well to spot if the test are doing anything unexpected
 
 function createFormData (...args) {
@@ -43,7 +41,6 @@ for (let x of [undefined, null, 0, '', {}, false, true, globalThis, NaN]) {
 {
   // Appending a empty blob with a name should convert it to a File
   var val = createFormData(['key', new Blob(), 'blank.txt']).get('key')
-  console.log(val)
   console.assert(val[Symbol.toStringTag], 'The value should have a symbol toStringTag')
   console.assert(val[Symbol.toStringTag] === 'File', 'the symbol.toStringTag should be "File"')
   console.assert(val.name === 'blank.txt', 'File name should be blank.txt')
@@ -132,15 +129,20 @@ for (let x of [undefined, null, 0, '', {}, false, true, globalThis, NaN]) {
 
 {
   const file = createFormData(['key', new File([], 'doc.txt')]).get('key')
-  console.assert('doc.txt' === file.name, 'Shold return correct filename with File')
+  console.assert('doc.txt' === file.name, 'should return correct filename with File')
 }
 
 {
   const file = createFormData(['key', new Blob(), 'doc.txt']).get('key')
-  console.assert('doc.txt' === file.name, 'Shold return correct filename with Blob filename')
+  console.assert('doc.txt' === file.name, 'should return correct filename with Blob filename')
 }
 
 {
   const file = createFormData(['key', new Blob()]).get('key')
-  console.assert('blob' === file.name, 'Shold return correct filename with just Blob')
+  console.assert('blob' === file.name, 'should return correct filename with just Blob')
+}
+
+{
+  const fd = createFormData(['key', new Blob()])
+  console.assert(fd.get('key') === fd.get('key'), 'should return same instances')
 }

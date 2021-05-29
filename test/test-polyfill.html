@@ -1,0 +1,383 @@
+<script>
+  globalThis.NativeFormData = FormData
+  globalThis.NativeFile = File
+  window.FormData = undefined
+  // Want to simulate the kind of error we get in
+  // old safari & ie when constructing a file
+  window.File = new Proxy(NativeFile, {
+    construct (target, args) {
+      throw new Error()
+    }
+  })
+</script>
+<!-- <script src="../formdata.min.js"></script> -->
+<script src="../FormData.js"></script>
+<script>
+  const Polyfill = globalThis.FormData
+
+  function catchErr(fn) {
+    try { fn() } catch (err) { return err }
+  }
+
+  ;[NativeFormData, Polyfill].map(async FormData => {
+    function createFormData (...args) {
+      const fd = new FormData()
+      for (const arg of args) {
+        fd.append(...arg)
+      }
+      return fd
+    }
+
+    function createForm (str) {
+      var form = document.createElement('form')
+      form.innerHTML = str
+      return new FormData(form)
+    }
+
+    const impl = FormData === NativeFormData ? 'native' : 'polyfill'
+
+    {
+      const fd = new FormData()
+      const err = catchErr(() => fd.append('key'))
+      console.assert(err instanceof TypeError, 'should throw on few arguments')
+    }
+
+    // #78
+    {
+      const fd = createForm(`<input name=foo type=file>`)
+      console.assert(fd.has('foo') === true)
+      console.assert(fd.get('foo').type === 'application/octet-stream')
+    }
+
+    {
+      const fd = createFormData(['key', 'value1'])
+      console.assert(fd.get('key') === 'value1')
+    }
+
+    {
+      const fd = createFormData(['key', 'value2'], ['key', 'value1'])
+      console.assert(fd.get('key') === 'value2')
+    }
+
+    {
+      const fd = createFormData(['key', undefined])
+      console.assert(fd.get('key') === 'undefined')
+    }
+
+    {
+      const fd = createFormData(['key', undefined], ['key', 'value1'])
+      console.assert(fd.get('key') === 'undefined')
+    }
+
+    {
+      const fd = createFormData(['key', null])
+      console.assert(fd.get('key') === 'null')
+    }
+
+    {
+      const fd = createFormData(['key', null], ['key', 'value1'])
+      console.assert(fd.get('key') === 'null')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', 'value1')
+      console.assert(fd.get('key') === 'value1')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', 'value2')
+      fd.append('key', 'value1')
+      console.assert(fd.get('key') === 'value2')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', undefined)
+      console.assert(fd.get('key') === 'undefined')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', undefined)
+      fd.append('key', 'value1')
+      console.assert(fd.get('key') === 'undefined')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', null)
+      console.assert(fd.get('key') === 'null')
+    }
+
+    {
+      const fd = new FormData(document.createElement('form'))
+      fd.append('key', null)
+      fd.append('key', 'value1')
+      console.assert(fd.get('key') === 'null')
+    }
+
+    {
+      const fd = createFormData(['key', new Blob(), 'blank.txt'])
+      const file = fd.get('key')
+      console.assert(file.name === 'blank.txt')
+      console.assert(file.type === '')
+      console.assert(file.size === 0)
+      if (impl === Polyfill) {
+        // Chrome dose wrong...
+        console.assert(fd.get('key') === fd.get('key'), 'File should be same instances')
+      }
+    }
+
+    console.info('testing has() on ' + impl)
+
+    {
+      const fd = new FormData()
+      const err = catchErr(() => fd.has())
+      console.assert(err instanceof TypeError)
+    }
+
+    {
+      const fd = new FormData()
+      fd.append('n1', 'value')
+      console.assert(fd.has('n1') === true)
+      console.assert(fd.has('n2') === false)
+      fd.append('n2', 'value')
+      console.assert(fd.has('n1') === true)
+      console.assert(fd.has('n2') === true)
+      fd.append('n3', new Blob(['content']))
+      console.assert(fd.has('n3') === true)
+    }
+
+    console.info('testing entries() on ' + impl)
+
+    {
+      const fd = createFormData(
+        ['keyA', 'val1'],
+        ['keyA', 'val2'],
+        ['keyB', 'val3'],
+        ['keyA', 'val4']
+      )
+
+      const actualKeys = [...fd.keys()] + ''
+      const expectedKeys = ['keyA', 'keyA', 'keyB', 'keyA'] + ''
+      console.assert(actualKeys === expectedKeys, 'should return the keys as they are appended')
+
+      const actualValues = [...fd.values()] + ''
+      const expectedValues = ['val1', 'val2', 'val3', 'val4'] + ''
+      console.assert(actualValues === expectedValues, 'should return values as they are appended')
+
+      const actualEntries = [...fd] + ''
+      const expectedEntries = [
+        ['keyA', 'val1'],
+        ['keyA', 'val2'],
+        ['keyB', 'val3'],
+        ['keyA', 'val4']
+      ] + ''
+      console.assert(actualEntries === expectedEntries, 'should return the entres as they are appended')
+    }
+
+    console.info('testing set() on ' + impl)
+
+    {
+      const fd = new FormData()
+      const err = catchErr(() => fd.set())
+      console.assert(err instanceof TypeError, 'should throw on few arguments')
+    }
+
+    {
+      const fd = createFormData(
+        ['keyA', 'val1'],
+        ['keyA', 'val2'],
+        ['keyB', 'val3'],
+        ['keyA', 'val4']
+      )
+      fd.set('keyA', 'val3')
+      const actual = String([...fd])
+      const expected = String([['keyA', 'val3'], ['keyB', 'val3']])
+      const msg = 'Overwrite first matching key'
+      console.assert(actual === expected, msg)
+    }
+
+    {
+      const fd = createFormData(['keyB', 'val3'])
+      fd.set('keyA', 'val3')
+      const actual = String([...fd])
+      const expected = String([['keyB', 'val3'], ['keyA', 'val3']])
+      const msg = 'appends value when no matching'
+      console.assert(actual === expected, msg)
+    }
+
+    console.info('testing delete() on ' + impl)
+
+    {
+      const fd = new FormData()
+      const err = catchErr(() => fd.delete())
+      console.assert(err instanceof TypeError, 'should throw on few arguments')
+    }
+
+    {
+      var fd = new FormData()
+      fd.append('name', 'value')
+      console.assert(fd.has('name') === true, 'name should have been appended')
+      fd.delete('name')
+      console.assert(fd.has('name') === false, 'name should have been deleted')
+
+      fd.append('name', new Blob(['content']))
+      console.assert(fd.has('name') === true, 'it should have a name field')
+      fd.delete('name')
+      console.assert(fd.has('name') === false, 'name should have been deleted')
+
+      fd.append('n1', 'v1')
+      fd.append('n2', 'v2')
+      fd.append('n1', 'v3')
+      fd.delete('n1')
+      console.assert(fd.has('n1') === false, 'delete should remove all keys with n1')
+      console.assert(String([...fd]) === String([['n2', 'v2']]))
+    }
+
+    {
+      // #43
+      // Old ie don't have Symbol.toStringTag and the polyfill was
+      // therefore not able to change the
+      // `Object.prototype.toString.call` to return correct type of the polyfilled
+      // File constructor
+      const fd = createFormData(['key', new NativeFile([], 'doc.txt')])
+      const mockFile = fd.get('key')
+      console.assert(mockFile.name === 'doc.txt', 'Should return correct filename with File')
+    }
+
+    {
+      const fd = createFormData(['key', new Blob(), 'doc.txt'])
+      const mockFile = fd.get('key')
+      console.assert('doc.txt', mockFile.name, 'Should return correct filename with Blob filename')
+    }
+
+    {
+      const fd = createFormData(['key', new Blob()])
+      const mockFile = fd.get('key')
+      console.assert('blob' === mockFile.name, 'Default name should be Blob')
+    }
+
+    console.info('testing linebreaks() on ' + impl)
+    {
+      const form = document.createElement('form')
+      const textarea = document.createElement('textarea')
+      textarea.name = 'key'
+      form.append(textarea)
+
+      // Native FormData normalizes linefeeds in textareas to CRLF
+      // In order to be consistent the polyfill should do the same
+      {
+        textarea.value = '\n'
+        const fd = new FormData(form)
+        const value = fd.get('key')
+        console.assert('\r\n' === value, 'Should convert LF to CRLF for textareas')
+      }
+
+      {
+        textarea.value = '\r'
+        const fd = new FormData(form)
+        const value = fd.get('key')
+        console.assert('\r\n' === value, 'Should convert CR to CRLF for textareas')
+      }
+
+      {
+        textarea.value = 'a\n\ra\r\na\n\r\n\r\n\r\n\na\r\r'
+        const fd = new FormData(form)
+        const value = fd.get('key')
+        console.assert(
+          'a\r\n\r\na\r\na\r\n\r\n\r\n\r\n\r\na\r\n\r\n' === value,
+          'Should normalize mixed linefeeds to CRLF for textareas'
+        )
+      }
+
+      {
+        const fd = createFormData(['key', '\n'])
+        const value = fd.get('key')
+        console.assert('\n', value, 'Should not convert LF to CRLF when provided by append')
+      }
+
+      {
+        const fd = createFormData(['key', '\r'])
+        const value = fd.get('key')
+        console.assert('\r' === value, 'Should not convert CR to CRLF when provided by append')
+      }
+    }
+
+    console.info('testing disabled() on ' + impl)
+
+    {
+      const fd = createForm(`<input disabled name=foo value=bar>`)
+      console.assert(fd.has('foo') === false, 'Should not include disabled inputs')
+    }
+
+    // #110
+    {
+      const fd = createForm(`<fieldset disabled><input name=foo value=bar></fieldset>`)
+      console.assert(fd.has('foo') === false, 'Should not include disabled fieldset inputs')
+    }
+
+    // #56
+    {
+      const fd = createForm(`
+        <select multiple name="example">
+          <option selected disabled value="foo">Please choose one</option>
+        </select>
+      `)
+
+      console.assert(
+        fd.has('example') === false,
+        'Select elements where the option is both selected and disabled should not be included'
+      )
+    }
+
+    // #45
+    {
+      const fd = createForm(`
+        <select multiple name="example">
+          <option selected value="volvo">Volvo</option>
+          <option selected value="saab">Saab</option>
+          <option value="mercedes">Mercedes</option>
+          <option value="audi">Audi</option>
+        </select>
+      `)
+
+      console.assert(
+        String([...fd]) === String([['example', 'volvo'], ['example', 'saab']]),
+        'Should return selected items'
+      )
+    }
+
+    // #62
+    {
+      const fd = createForm(`
+        <input type="text" name="username" value="bob">
+        <input type="submit" value="rename" name="action">
+        <input type="submit" value="find_n_delete" name="action">
+      `)
+
+      console.assert(
+        String([...fd]) === String([['username', 'bob']]),
+        'Should not add buttons to FormData'
+      )
+    }
+
+    // #86
+    {
+      const formData = createFormData(['key', 'value1'])
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', 'https://httpbin.org/post')
+      xhr.setRequestHeader('Content-Type', 'text/plain')
+      xhr.responseType = 'json'
+      xhr.onload = () => {
+        console.assert(
+          xhr.response.headers['Content-Type'] === 'text/plain',
+          'Shouldn not add Content-Type header if already present'
+        )
+      }
+      xhr.send(formData)
+    }
+  })
+</script>

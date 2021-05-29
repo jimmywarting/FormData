@@ -1,6 +1,6 @@
-const https = require('https')
-const fs = require('fs')
-const { URLSearchParams } = require('url')
+import https from 'https'
+import fs from 'fs'
+import { URLSearchParams } from 'url'
 
 // This is an async file read
 const code = fs.readFileSync('./FormData.js', 'utf8').toString()
