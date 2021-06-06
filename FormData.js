@@ -47,9 +47,6 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
         name: {
           value: d
         },
-        lastModifiedDate: {
-          value: t
-        },
         lastModified: {
           value: +t
         },
