@@ -40,7 +40,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     new File([], '') // eslint-disable-line
   } catch (a) {
     global.File = function File (b, d, c) {
-      const blob = new Blob(b, c)
+      const blob = new Blob(b, c || {})
       const t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date()
 
       Object.defineProperties(blob, {
