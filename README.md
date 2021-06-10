@@ -34,7 +34,7 @@ fd.append('file-upload', {
   type: '',
   name: 'cat.mp4',
   stream() { return stream },
-  [symbol.toStringTag]: 'File'
+  [Symbol.toStringTag]: 'File'
 })
 
 fetch('https://httpbin.org/post', { method: 'POST', body: fd })
