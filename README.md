@@ -46,7 +46,7 @@ It also comes with way to convert FormData into Blobs - it's not something that 
 It's mainly for [node-fetch](https://github.com/node-fetch/node-fetch) and other http library to ease the process of serializing a FormData into a blob and just wish to deal with Blobs instead
 ```js
 import { Readable } from 'node:stream'
-import FormData, { formDataToBlob } from 'formdata-polyfill/esm.min.js'
+import { FormData, formDataToBlob } from 'formdata-polyfill/esm.min.js'
 
 const blob = formDataToBlob(new FormData())
 fetch('https://httpbin.org/post', { method: 'POST', body: blob })
