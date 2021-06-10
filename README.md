@@ -44,17 +44,15 @@ fetch('https://httpbin.org/post', { method: 'POST', body: fd })
 
 It also comes with way to convert FormData into Blobs - it's not something that every developer should have to deal with.
 It's mainly for [node-fetch](https://github.com/node-fetch/node-fetch) and other http library to ease the process of serializing a FormData into a blob and just wish to deal with Blobs instead
-<details>
-    <summary>See code example</summary>
-
 ```js
-import { formDataToBlob } from 'formdata-polyfill/esm.min.js'
+import { Readable } from 'node:stream'
+import FormData, { formDataToBlob } from 'formdata-polyfill/esm.min.js'
 
-const blob = formDataToBlob(formData)
+const blob = formDataToBlob(new FormData())
 fetch('https://httpbin.org/post', { method: 'POST', body: blob })
 
 // node built in http and other similar http library have to do:
-const stream = stream.Readable.from(blob.stream())
+const stream = Readable.from(blob.stream())
 const req = http.request('http://httpbin.org/post', {
   method: 'post',
   headers: {
@@ -64,7 +62,7 @@ const req = http.request('http://httpbin.org/post', {
 })
 stream.pipe(req)
 ```
-</details>
+
 PS: blob & file that are appended to the FormData will not be read until any of the serialized blob read-methods gets called
 ...so uploading very large files is no biggie
 
