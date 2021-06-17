@@ -101,6 +101,8 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     }
   }
 
+  const escape = str => str.replace(/\n/g, '%0A').replace(/\r/g, '%0D').replace(/"/g, '%22')
+
   /**
    * @implements {Iterable}
    */
@@ -327,31 +329,17 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @return {Blob} [description]
      */
     ['_blob'] () {
-      const boundary = '----formdata-polyfill-' + Math.random()
-      const chunks = []
+        const boundary = '----formdata-polyfill-' + Math.random(),
+          chunks = [],
+          p = `--${boundary}\r\nContent-Disposition: form-data; name="`
+        this.forEach((value, name) => typeof value == 'string'
+          ? chunks.push(p + escape(name) + `"\r\n\r\n${value}\r\n`)
+          : chunks.push(p + escape(name) + `"; filename="${escape(value.name)}"\r\nContent-Type: ${value.type||"application/octet-stream"}\r\n\r\n`, value, `\r\n`))
+        chunks.push(`--${boundary}--`)
+        return new Blob(chunks, {
+          type: "multipart/form-data; boundary=" + boundary
+        })
 
-      for (const [name, value] of this) {
-        chunks.push(`--${boundary}\r\n`)
-
-        if (value instanceof Blob) {
-          chunks.push(
-            `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
-            `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
-            value,
-            '\r\n'
-          )
-        } else {
-          chunks.push(
-            `Content-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`
-          )
-        }
-      }
-
-      chunks.push(`--${boundary}--`)
-
-      return new Blob(chunks, {
-        type: 'multipart/form-data; boundary=' + boundary
-      })
     }
 
     /**

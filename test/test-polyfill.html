@@ -12,14 +12,16 @@
 </script>
 <!-- <script src="../formdata.min.js"></script> -->
 <script src="../FormData.js"></script>
-<script>
+<script type="module">
+  import {formDataToBlob} from '../formdata-to-blob.js'
+
   const Polyfill = globalThis.FormData
 
   function catchErr(fn) {
     try { fn() } catch (err) { return err }
   }
 
-  ;[NativeFormData, Polyfill].map(async FormData => {
+  for (const FormData of [NativeFormData, Polyfill]) {
     function createFormData (...args) {
       const fd = new FormData()
       for (const arg of args) {
@@ -40,6 +42,34 @@
       const fd = new FormData()
       const err = catchErr(() => fd.append('key'))
       console.assert(err instanceof TypeError, 'should throw on few arguments')
+    }
+
+    // #120 escapes keys when encoding FormData
+    for (let [key, expected] of [['key\n', 'key%0A'], ['key\r', 'key%0D'], ['key"', 'key%22']]) {
+      const origFd = createFormData([key, 'value'])
+      const fd = await new Response(origFd._blob ? origFd._blob() : origFd).formData()
+      console.assert(fd.has(expected) === true)
+    }
+
+    // #120 escapes filename encoding FormData
+    for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Aue']]) {
+      const origFd = createFormData(['key', new NativeFile([], filename)])
+      const fd = await new Response(origFd._blob ? origFd._blob() : origFd).formData()
+      console.assert(fd.get('key').name === expected)
+    }
+
+    // #120 escapes keys when encoding FormData
+    for (let [key, expected] of [['key\n', 'key%0A'], ['key\r', 'key%0D'], ['key"', 'key%22']]) {
+      const blob = formDataToBlob(createFormData([key, 'value']))
+      const fd = await new Response(blob).formData()
+      console.assert(fd.has(expected) === true)
+    }
+
+    // #120 escapes filename encoding FormData
+    for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Aue']]) {
+      const blob = formDataToBlob(createFormData(['key', new NativeFile([], filename)]))
+      const fd = await new Response(blob).formData()
+      console.assert(fd.get('key').name === expected)
     }
 
     // #78
@@ -296,7 +326,7 @@
       {
         const fd = createFormData(['key', '\n'])
         const value = fd.get('key')
-        console.assert('\n', value, 'Should not convert LF to CRLF when provided by append')
+        console.assert('\n' === value, 'Should not convert LF to CRLF when provided by append')
       }
 
       {
@@ -379,5 +409,5 @@
       }
       xhr.send(formData)
     }
-  })
+  }
 </script>

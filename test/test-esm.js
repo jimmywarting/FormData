@@ -1,5 +1,6 @@
 import Blob from 'fetch-blob'
-import {FormData, formDataToBlob, File} from '../esm.min.js'
+import File from 'fetch-blob/file.js'
+import {FormData, formDataToBlob} from '../esm.min.js'
 
 console.assert(
   formDataToBlob(createFormData(['key', 'value1'])).size > 100,
@@ -36,6 +37,21 @@ for (let x of [undefined, null, 0, '', {}, false, true, globalThis, NaN]) {
     createFormData(['key', x]).get('key') === String(x),
     `APPEND: it should normalize none blob values to string`
   )
+}
+
+
+// #120 escapes keys when encoding FormData
+for (let [key, expected] of [['key\n', 'key%0A'], ['key\r', 'key%0D'], ['key"', 'key%22']]) {
+  const fd = createFormData([key, 'value'])
+  const str = await formDataToBlob(fd).text()
+  console.assert(str.includes(expected) === true)
+}
+
+// #120 escapes filename encoding FormData
+for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Aue']]) {
+  const fd = createFormData(['key', new File([], filename)])
+  const str = await formDataToBlob(fd).text()
+  console.assert(str.includes(expected))
 }
 
 {

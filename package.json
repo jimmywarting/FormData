@@ -1,13 +1,13 @@
 {
   "name": "formdata-polyfill",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "HTML5 `FormData` for Browsers and Node.",
   "type": "module",
   "main": "formdata.min.js",
   "scripts": {
     "build": "node build",
-    "_prepare": "npm run build && npm run test",
-    "_test": "karma start --single-run --browsers ChromeHeadless karma.conf.js"
+    "prepare": "npm run build && npm run test",
+    "test": "node test/test-esm.js"
   },
   "repository": {
     "type": "git",
