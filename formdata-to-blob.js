@@ -2,7 +2,7 @@ const escape = str => str.replace(/\n/g, '%0A').replace(/\r/g, '%0D').replace(/"
 
 /**
  * pure function to convert any formData instance to a Blob
- * instances syncronus without reading all of the files
+ * instances synchronous without reading all of the files
  *
  * @param {FormData|*} formData an instance of a formData Class
  * @param {Blob|*} [BlobClass=Blob] the Blob class to use when constructing it
@@ -14,7 +14,7 @@ export function formDataToBlob (formData, BlobClass = Blob) {
 
   for (let [name, value] of formData) {
     if (typeof value === 'string') {
-      chunks.push(prefix + escape(name) + `"\r\n\r\n${value}\r\n`)
+      chunks.push(prefix + escape(name) + `"\r\n\r\n${value.replace(/\r(?!\n)|(?<!\r)\n/g, '\r\n')}\r\n`)
     } else {
       chunks.push(
         prefix + escape(name) + `"; filename="${escape(value.name)}"\r\n` +

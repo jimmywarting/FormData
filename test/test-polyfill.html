@@ -65,6 +65,25 @@
       console.assert(fd.has(expected) === true)
     }
 
+    // #120 normalizes linebreaks
+    // {
+    //   var fd = new FormData()
+    //   fd.set('a', '\n')
+    //   fd.set('b', '\r')
+    //   fd.set('c', '\n\r')
+
+    //   console.assert(fd.get('a') === '\n')
+    //   console.assert(fd.get('b') === '\r')
+    //   console.assert(fd.get('c') === '\n\r')
+
+    //   new Response(formDataToBlob(fd)).formData().then(fd2 => {
+    //     console.log([...fd2])
+    //     console.assert(fd2.get('a') === '\r\n')
+    //     console.assert(fd2.get('b') === '\r\n')
+    //     console.assert(fd2.get('c') === '\r\n\r\n')
+    //   })
+    // }
+
     // #120 escapes filename encoding FormData
     for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Aue']]) {
       const blob = formDataToBlob(createFormData(['key', new NativeFile([], filename)]))
@@ -154,7 +173,7 @@
       console.assert(file.name === 'blank.txt')
       console.assert(file.type === '')
       console.assert(file.size === 0)
-      if (impl === Polyfill) {
+      if (impl === 'polyfill') {
         // Chrome dose wrong...
         console.assert(fd.get('key') === fd.get('key'), 'File should be same instances')
       }
@@ -392,6 +411,41 @@
         String([...fd]) === String([['username', 'bob']]),
         'Should not add buttons to FormData'
       )
+    }
+
+    // chrome dose wrong...
+    if (impl === 'polyfill') {
+      var fd = new FormData()
+      fd.set('a', 'a\na')
+      fd.set('b', 'b\rb')
+      fd.set('c', 'c\n\rc')
+
+      console.assert(fd.get('a') === 'a\na')
+      console.assert(fd.get('b') === 'b\rb')
+      console.assert(fd.get('c') === 'c\n\rc')
+
+      new Response(fd._blob()).formData().then(fd => {
+        console.assert(fd.get('a') === 'a\r\na')
+        console.assert(fd.get('b') === 'b\r\nb')
+        console.assert(fd.get('c') === 'c\r\n\r\nc')
+      })
+    }
+
+    {
+      var fd = new FormData()
+      fd.set('a', 'a\na')
+      fd.set('b', 'b\rb')
+      fd.set('c', 'c\n\rc')
+
+      console.assert(fd.get('a') === 'a\na')
+      console.assert(fd.get('b') === 'b\rb')
+      console.assert(fd.get('c') === 'c\n\rc')
+
+      new Response(formDataToBlob(fd)).text().then(str => {
+        console.assert(str.includes('a\r\na'))
+        console.assert(str.includes('b\r\nb'))
+        console.assert(str.includes('c\r\n\r\nc'))
+      })
     }
 
     // #86

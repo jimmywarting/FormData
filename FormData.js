@@ -92,7 +92,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   // normalize line feeds for textarea
   // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
   function normalizeLinefeeds (value) {
-    return value.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
+    return value.replace(/\r(?!\n)|(?<!\r)\n/g, '\r\n')
   }
 
   function each (arr, cb) {
@@ -333,13 +333,12 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
           chunks = [],
           p = `--${boundary}\r\nContent-Disposition: form-data; name="`
         this.forEach((value, name) => typeof value == 'string'
-          ? chunks.push(p + escape(name) + `"\r\n\r\n${value}\r\n`)
+          ? chunks.push(p + escape(name) + `"\r\n\r\n${normalizeLinefeeds(value)}\r\n`)
           : chunks.push(p + escape(name) + `"; filename="${escape(value.name)}"\r\nContent-Type: ${value.type||"application/octet-stream"}\r\n\r\n`, value, `\r\n`))
         chunks.push(`--${boundary}--`)
         return new Blob(chunks, {
           type: "multipart/form-data; boundary=" + boundary
         })
-
     }
 
     /**

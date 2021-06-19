@@ -162,3 +162,20 @@ for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Au
   const fd = createFormData(['key', new Blob()])
   console.assert(fd.get('key') === fd.get('key'), 'should return same instances')
 }
+
+{
+  var fd = new FormData()
+  fd.set('a', 'a\na')
+  fd.set('b', 'b\rb')
+  fd.set('c', 'c\n\rc')
+
+  console.assert(fd.get('a') === 'a\na')
+  console.assert(fd.get('b') === 'b\rb')
+  console.assert(fd.get('c') === 'c\n\rc')
+
+  formDataToBlob(fd).text().then(str => {
+    console.assert(str.includes('a\r\na'))
+    console.assert(str.includes('b\r\nb'))
+    console.assert(str.includes('c\r\n\r\nc'))
+  })
+}
