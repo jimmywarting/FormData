@@ -92,7 +92,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
   // normalize line feeds for textarea
   // https://html.spec.whatwg.org/multipage/form-elements.html#textarea-line-break-normalisation-transformation
   function normalizeLinefeeds (value) {
-    return value.replace(/\r(?!\n)|(?<!\r)\n/g, '\r\n')
+    return value.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n')
   }
 
   function each (arr, cb) {
