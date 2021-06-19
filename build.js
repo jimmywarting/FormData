@@ -11,7 +11,7 @@ const postData = new URLSearchParams({
   output_format: 'text',
   output_info: 'compiled_code',
   warning_level: 'QUIET',
-  output_wrapper: ';(function(){%output%})();',
+  output_wrapper: '/*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */\n;(function(){%output%})();',
   js_code: code
 }).toString()
 
