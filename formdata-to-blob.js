@@ -1,6 +1,10 @@
 /*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
 
-const escape = str => str.replace(/\n/g, '%0A').replace(/\r/g, '%0D').replace(/"/g, '%22')
+const escape = (str, filename) =>
+  (filename ? str : str.replace(/\r?\n|\r/g, '\r\n'))
+  .replace(/\n/g, '%0A')
+  .replace(/\r/g, '%0D')
+  .replace(/"/g, '%22')
 
 /**
  * pure function to convert any formData instance to a Blob
@@ -19,7 +23,7 @@ export function formDataToBlob (formData, BlobClass = Blob) {
       chunks.push(prefix + escape(name) + `"\r\n\r\n${value.replace(/\r(?!\n)|(?<!\r)\n/g, '\r\n')}\r\n`)
     } else {
       chunks.push(
-        prefix + escape(name) + `"; filename="${escape(value.name)}"\r\n` +
+        prefix + escape(name) + `"; filename="${escape(value.name, 1)}"\r\n` +
         `Content-Type: ${value.type || 'application/octet-stream'}\r\n\r\n`,
         value,
         '\r\n'
