@@ -12,7 +12,7 @@ But NodeJS still laks a proper FormData<br>The good old form-data package is a v
 - It's as pure/spec compatible as it possible gets.
 - It's compatible with [node-fetch](https://github.com/node-fetch/node-fetch).
 - It have higher platform dependencies as it uses classes, symbols & private fields
-- Only dependency it has is fetch-blob
+- Only dependency it has is [fetch-blob](https://github.com/node-fetch/fetch-blob)
 
 ```js
 // Node example
