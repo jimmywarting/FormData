@@ -74,7 +74,7 @@ usage:
 import 'formdata-polyfill' // that's it
 ```
 
-The browser polyfill conditionally replaces the native implementation rather then fixing the missing functions,
+The browser polyfill conditionally replaces the native implementation rather than fixing the missing functions,
 since otherwise there is no way to get or delete existing values in the FormData object.
 Therefore this also patches `XMLHttpRequest.prototype.send` and `fetch` to send the `FormData` as a blob,
 and `navigator.sendBeacon` to send native `FormData`.
