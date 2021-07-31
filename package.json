@@ -7,7 +7,8 @@
   "scripts": {
     "build": "node build",
     "prepare": "npm run build && npm run test",
-    "test": "node test/test-esm.js"
+    "test": "node test/test-esm.js",
+    "test-wpt": "node --experimental-loader ./test/http-loader.js ./test/test-wpt-in-node.js"
   },
   "repository": {
     "type": "git",
