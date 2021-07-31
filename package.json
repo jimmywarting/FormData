@@ -35,6 +35,6 @@
   },
   "homepage": "https://github.com/jimmywarting/FormData#readme",
   "dependencies": {
-    "fetch-blob": "^3.0.0"
+    "fetch-blob": "^3.1.2"
   }
 }
