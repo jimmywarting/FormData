@@ -8,7 +8,7 @@ The browser polyfill will likely have done its part already, and i hope you stop
 But NodeJS still laks a proper FormData<br>The good old form-data package is a very old and isn't spec compatible and dose some abnormal stuff to construct and read FormData instances that other http libraries are not happy about when it comes to follow the spec.
 
 ### The NodeJS / ESM version
-- The modular (~2.1 KiB minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
+- The modular (~2.3 KiB minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
 - It's as pure/spec compatible as it possible gets the test are run by WPT.
 - It's compatible with [node-fetch](https://github.com/node-fetch/node-fetch).
 - It have higher platform dependencies as it uses classes, symbols, ESM & private fields
