@@ -19,7 +19,7 @@ But NodeJS still laks a proper FormData<br>The good old form-data package is a v
 import fetch from 'node-fetch'
 import File from 'fetch-blob/file.js'
 import { fileFromSync } from 'fetch-blob/from.js'
-import { FormData } from 'formdata-polyfill/esm-min.js'
+import { FormData } from 'formdata-polyfill/esm.min.js'
 
 const file = fileFromSync('./README.md')
 const fd = new FormData()
