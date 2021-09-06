@@ -1,43 +1,21 @@
-import https from 'https'
-import fs from 'fs'
-import { URLSearchParams } from 'url'
+import { writeFileSync } from 'node:fs'
+import closure from 'google-closure-compiler'
 
-// This is an async file read
-const code = fs.readFileSync('./FormData.js', 'utf8').toString()
+const ClosureCompiler = closure.compiler
 
-// Build the post string from an object
-const postData = new URLSearchParams({
-  compilation_level: 'ADVANCED_OPTIMIZATIONS',
-  output_format: 'text',
-  output_info: 'compiled_code',
+const closureCompiler = new ClosureCompiler({
+  js: 'FormData.js',
   warning_level: 'QUIET',
   output_wrapper: '/*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */\n;(function(){%output%})();',
-  js_code: code
-}).toString()
+  compilation_level: 'ADVANCED'
+})
 
-// An object of options to indicate where to post to
-const options = {
-  host: 'closure-compiler.appspot.com',
-  path: '/compile',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Content-Length': Buffer.byteLength(postData)
-  }
-}
-
-// Set up the request
-const req = https.request(options, res => {
-  res.setEncoding('utf8')
-
-  if (res.statusCode !== 200) {
+closureCompiler.run((exitCode, stdOut, stdErr) => {
+  if (exitCode) {
     console.log('FATAL An error occurred trying to use closure compiler')
+    console.log(stdErr)
     process.exit(-2)
   }
 
-  res.pipe(fs.createWriteStream('formdata.min.js'))
+  writeFileSync('formdata.min.js', stdOut)
 })
-
-// post the data
-req.write(postData)
-req.end()

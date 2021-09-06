@@ -75,6 +75,11 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     }
   }
 
+  /**
+   * @param {string} name
+   * @param {string | undefined} filename
+   * @returns {[string, File|string]}
+   */
   function normalizeArgs (name, value, filename) {
     if (value instanceof Blob) {
       filename = filename !== undefined
@@ -97,6 +102,11 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     return value.replace(/\r?\n|\r/g, '\r\n')
   }
 
+  /**
+   * @template T
+   * @param {ArrayLike<T>} arr
+   * @param {{ (elm: T): void; }} cb
+   */
   function each (arr, cb) {
     for (let i = 0; i < arr.length; i++) {
       cb(arr[i])
@@ -112,14 +122,14 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
     /**
      * FormData class
      *
-     * @param {HTMLElement=} form
+     * @param {HTMLFormElement=} form
      */
     constructor (form) {
+      /** @type {[string, string|File][]} */
       this._data = []
 
       const self = this
-
-      form && each(form.elements, elm => {
+      form && each(form.elements, (/** @type {HTMLInputElement} */ elm) => {
         if (
           !elm.name ||
           elm.disabled ||
@@ -196,7 +206,6 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      *
      * @param   {Function}  callback  Executed for each item with parameters (value, name, thisArg)
      * @param   {Object=}   thisArg   `this` context for callback function
-     * @return  {undefined}
      */
     forEach (callback, thisArg) {
       ensureArgs(arguments, 1)
@@ -275,11 +284,11 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * @param   {string}    name      Filed name
      * @param   {string}    value     Field value
      * @param   {string=}   filename  Filename (optional)
-     * @return  {undefined}
      */
     set (name, value, filename) {
       ensureArgs(arguments, 2)
       name = String(name)
+      /** @type {[string, string|File][]} */
       const result = []
       const args = normalizeArgs(name, value, filename)
       let replace = true
@@ -347,7 +356,7 @@ if (typeof Blob !== 'undefined' && (typeof FormData === 'undefined' || !FormData
      * The class itself is iterable
      * alias for formdata.entries()
      *
-     * @return  {Iterator}
+     * @return {Iterator}
      */
     [Symbol.iterator] () {
       return this.entries()
