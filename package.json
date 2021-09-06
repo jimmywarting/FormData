@@ -16,6 +16,7 @@
   },
   "files": [
     "esm.min.js",
+    "esm.min.d.ts",
     "FormData.js",
     "formdata-to-blob.js",
     "formdata.min.js",
