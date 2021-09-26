@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Started running test against WPTs own test
 ### Changed
 - Updated fetch-blob dep
+- downgraded optional chaining to support node 12.20
 ### Removed
 - removed travis build process file
 - removed empty npmignore file
