@@ -19,7 +19,7 @@ But NodeJS still laks a proper FormData<br>The good old form-data package is a v
 import fetch from 'node-fetch'
 import File from 'fetch-blob/file.js'
 import { fileFromSync } from 'fetch-blob/from.js'
-import { FormData } from 'formdata-polyfill/esm-min.js'
+import { FormData } from 'formdata-polyfill/esm.min.js'
 
 const file = fileFromSync('./README.md')
 const fd = new FormData()
@@ -43,7 +43,7 @@ fetch('https://httpbin.org/post', { method: 'POST', body: fd })
 ----
 
 It also comes with way to convert FormData into Blobs - it's not something that every developer should have to deal with.
-It's mainly for [node-fetch](https://github.com/node-fetch/node-fetch) and other http library to ease the process of serializing a FormData into a blob and just wish to deal with Blobs instead (Deno [adapted](https://github.com/denoland/deno/pull/11050/files) this [formDataToBlob](https://github.com/jimmywarting/FormData/blob/5ddea9e0de2fc5e246ab1b2f9d404dee0c319c02/formdata-to-blob.js) to the core and passes all WPT tests run by the browser itself)
+It's mainly for [node-fetch](https://github.com/node-fetch/node-fetch) and other http library to ease the process of serializing a FormData into a blob and just wish to deal with Blobs instead (Both Deno and Undici adapted a version of this [formDataToBlob](https://github.com/jimmywarting/FormData/blob/5ddea9e0de2fc5e246ab1b2f9d404dee0c319c02/formdata-to-blob.js) to the core and passes all WPT tests run by the browser itself)
 ```js
 import { Readable } from 'node:stream'
 import { FormData, formDataToBlob } from 'formdata-polyfill/esm.min.js'
