@@ -32,7 +32,7 @@ fd.append('file-upload', file)
 fd.append('file-upload', {
   size: 123,
   type: '',
-  name: 'cat.mp4',
+  name: 'cat-video.mp4',
   stream() { return stream },
   [Symbol.toStringTag]: 'File'
 })
