@@ -6,7 +6,6 @@
   "main": "formdata.min.js",
   "scripts": {
     "build": "node build.js",
-    "prepare": "npm run build && npm run test",
     "test": "node test/test-esm.js",
     "test-wpt": "node --experimental-loader ./test/http-loader.js ./test/test-wpt-in-node.js",
     "test-polyfill": "php -S localhost:4445 & open http://localhost:4445/test/test-polyfill.html"
