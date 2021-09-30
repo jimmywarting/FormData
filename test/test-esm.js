@@ -76,6 +76,23 @@ for (let [filename, expected] of [['val\nue', 'val%0Aue'], ['val%0Aue', 'val%0Au
   console.assert(fd.has('key3') === true)
 }
 
+class FormDataLike {
+  append(){}
+  set(){}
+  get(){}
+  getAll(){}
+  delete(){}
+  keys(){}
+  values(){}
+  entries(){}
+  forEach(){}
+  get [Symbol.toStringTag](){ return 'FormData' }
+}
+
+console.assert(new FormDataLike() instanceof FormData, 'It should be a formdata like object')
+console.assert(!(null instanceof FormData), 'null check dont throw')
+console.assert(new FormData() instanceof FormData, 'instance check works')
+
 {
   const msg = 'should return the keys/values/entres in the order they was appended'
   const entries = [
