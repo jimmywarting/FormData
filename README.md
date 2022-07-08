@@ -1,3 +1,5 @@
+> **Note:** FormData is built in to NodeJS v18 globally so that you no longer need this.
+
 ### A `FormData` polyfill for the browser ...and a module for NodeJS (`New!`)
 
 ```bash
