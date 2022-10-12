@@ -7,7 +7,7 @@ npm install formdata-polyfill
 ```
 
 The browser polyfill will likely have done its part already, and i hope you stop supporting old browsers c",)<br>
-But NodeJS still laks a proper FormData<br>The good old form-data package is a very old and isn't spec compatible and dose some abnormal stuff to construct and read FormData instances that other http libraries are not happy about when it comes to follow the spec.
+But NodeJS still lacks a proper FormData<br>The good old form-data package is a very old and isn't spec compatible and does some abnormal stuff to construct and read FormData instances that other http libraries are not happy about when it comes to follow the spec.
 
 ### The NodeJS / ESM version
 - The modular (~2.3 KiB minified uncompressed) version of this package is independent of any browser stuff and don't patch anything
