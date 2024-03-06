@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/jimmywarting/FormData#readme",
   "dependencies": {
-    "fetch-blob": "^3.1.2"
+    "fetch-blob": "^4.0.0"
   },
   "devDependencies": {
     "@types/google-closure-compiler": "^0.0.19",
